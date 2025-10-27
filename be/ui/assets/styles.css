@@ -1,33 +1,21 @@
-/*
-.container {
-  flex-flow:row wrap;
+#gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1em;
 }
 
-.container img {
-  object-fit: contain;
-  width:10%;
-  height:10%;
-}
-*/
-
-.container {
-/*
-    height: 75%%;
-    width: 75%;
-*/
-    background-color: red;
-    float: left;
-    overflow: hidden;
-    margin: 20px;
+.item {
+  height: 40vh;
+  flex-grow: 1;
 }
 
-.container img {
-    display: block;
+.item:last-child {
+  flex-grow: 10;
 }
 
-.portrait img {
-    width: 10%;
-
-.landscape img {
-    height: 10%;
+.item img {
+  object-fit: cover;
+  max-height: 100%;
+  min-width: 100%;
+  vertical-align: bottom;
 }

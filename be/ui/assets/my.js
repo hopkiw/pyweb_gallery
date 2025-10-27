@@ -49,45 +49,20 @@ async function getImagesForTag() {
 
 
 function updateImages() {
-  const container = document.createElement('div');
-  container.className = 'container';
-
-  const refRatio = 240/300;
+  var children = [];
   for (var i = 0; i < imageResults.length; i++) {
-    // const img = document.createElement('img');
-    const img = new Image();
-    /*
-    img.onload = function() {
-      console.log('image callback on', this);
-      if ( (img.width/img.height) < refRatio ) { 
-        this.className = 'portrait';
-      } else {
-        this.className = 'landscape';
-      }
-    };
-    */
-    img.classList.add('portrait');
-    img.classList.add('mine');
-    img.src = imageResults[i];
-    container.appendChild(img);
-  }
+    const div = document.createElement('div');
+    div.className = 'item';
 
+    const img = document.createElement('img');
+    img.src = imageResults[i];
+
+    div.appendChild(img);
+    children.push(div);
+  }
 
   const gallery = document.getElementById('gallery');
-  gallery.replaceChildren(container);
-  // now that they're loaded...
-  /*
-  for (var i = 0; i < gallery.children.length; i++) {
-    const img = gallery.children[i];
-    var refRatio = 240/300;
-
-    if ( (img.width/img.height) < refRatio ) { 
-      img.className = 'portrait';
-    } else {
-      img.addClass = 'landscape';
-    }
-  }
-  */
+  gallery.replaceChildren(...children);
 }
 
 function updateIncludeTagList() {
@@ -217,4 +192,5 @@ window.onload = () => {
   getAllTags();
   document.getElementById('form-include-tags-field').focus();
   // getImages();
+  const gallery = document.querySelector('#gallery');
 };
