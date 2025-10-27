@@ -1,8 +1,12 @@
+/* jshint esversion: 10 */
+
 var includedTags = [];
 var excludedTags = [];
 var allTags = [];
+var commonTags = [];
+var imageResults = [];
 
-var imageResults = new Set();
+var visibleTags = new Set();
 
 var selectedTag = "art";
 
@@ -39,14 +43,107 @@ async function getImagesForTag() {
     }
 
     const result = await response.json();
-    console.log('images for selected tag(s):', result);
     imageResults = [...result];
-    updateImages();
   } catch (error) {
     console.error(error.message);
   }
 }
 
+async function getTagsForImage(image) {
+  // const url = `/getTags/${image}`;
+  const url = '/getTags';
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ image: image })
+    });
+    if (!response.ok) {
+      throw new Error(`Response status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error(error.message);
+  }
+}
+
+async function updateVisibleTagList() {
+  for (var i = 0; i < imageResults.length; i++) {
+    const tags = await getTagsForImage(imageResults[i]);
+    for (var j = 0; j < tags.length; j++) {
+      visibleTags.add(tags[j]);
+    }
+    if (i == 0) {
+      commonTags= [...tags];
+    } else {
+      for (var k = 0; k < commonTags.length; k++) {
+        const tag = commonTags[k];
+        if (!tags.includes(tag)) {
+          commonTags.splice(k, 1);
+        }
+      }
+    }
+  }
+
+  const div = document.createElement('div');
+  const p = document.createElement('p');
+  p.textContent = 'Tags on these images:';
+  div.appendChild(p);
+
+  for (const tag of visibleTags) {
+    const span = document.createElement('span');
+
+    const incla = document.createElement('a');
+    incla.textContent = '[+]';
+    incla.className = 'add-include-tag';
+    span.appendChild(incla);
+
+    const excla = document.createElement('a');
+    excla.textContent = '[-]';
+    excla.className = 'add-exclude-tag';
+    span.appendChild(excla);
+
+    const taga = document.createElement('a');
+    taga.textContent = tag + ' ';
+    span.appendChild(taga);
+
+    div.appendChild(span);
+  }
+
+  document.getElementById('all-tags').replaceChildren(div);
+
+  const div2 = document.createElement('div');
+  const p2 = document.createElement('p');
+  p2.textContent = 'Tags common to all images:';
+  div2.appendChild(p2);
+
+  for (var m = 0; m < commonTags.length; m++) {
+    const span = document.createElement('span');
+
+    const incla = document.createElement('a');
+    incla.textContent = '[+]';
+    incla.className = 'add-include-tag';
+    span.appendChild(incla);
+
+    const excla = document.createElement('a');
+    excla.textContent = '[-]';
+    excla.className = 'add-exclude-tag';
+    span.appendChild(excla);
+
+    const taga = document.createElement('a');
+    taga.textContent = commonTags[m] + ' ';
+    span.appendChild(taga);
+
+    div2.appendChild(span);
+
+  }
+
+  document.getElementById('common-tags').replaceChildren(div2);
+}
 
 function updateImages() {
   var children = [];
@@ -72,7 +169,7 @@ function updateIncludeTagList() {
     const li = document.createElement('li');
 
     const a1 = document.createElement('a');
-    a1.textContent = '[-]'
+    a1.textContent = '[-]';
     a1.addEventListener('click', removeIncludeTag, false);
 
     const a2 = document.createElement('a');
@@ -94,7 +191,7 @@ function updateExcludeTagList() {
     const li = document.createElement('li');
 
     const a1 = document.createElement('a');
-    a1.textContent = '[-]'
+    a1.textContent = '[-]';
     a1.addEventListener('click', removeExcludeTag, false);
 
     const a2 = document.createElement('a');
@@ -147,26 +244,20 @@ function removeExcludeTag () {
   updateExcludeTagList();
 }
 
-function handleForm (e) {
+async function handleForm (e) {
+  e.preventDefault();
+
   const field = document.getElementById('form-include-tags-field');
   selectedTag = field.value;
   field.value = '';
   updateIncludeTagList();
-  getImagesForTag();
-  updateImages();
+  await getImagesForTag();
+  await updateImages();
+  await updateVisibleTagList();
 
-  e.preventDefault();
 }
 
 document.querySelector('#form-include-tags').onsubmit = handleForm;
-
-document.querySelector('#btn-get-tags').onclick = () => {
-  getTags();
-};
-
-document.querySelector('#btn-get-images').onclick = () => {
-  getImagesForTag();
-};
 
 var addIncludeButtons = document.getElementsByClassName('add-include-tag');
 for (var i = 0; i < addIncludeButtons.length; i++) {

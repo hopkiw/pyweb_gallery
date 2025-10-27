@@ -9,10 +9,6 @@
   </head>
   <body>
     <div class="w3-sidebar w3-bar-block" style="width:25%;right:0">
-      <div>
-        <button id="btn-get-tags" type="button">getTags</button>
-        <button id="btn-get-images" type="button">getImages</button>
-      </div>
       <form id='form-include-tags'>
         <label> Tags to include:
           <input type="text" id='form-include-tags-field' name="include-tags" />
@@ -30,24 +26,8 @@
       <div id="all-tags">
         <p>All tags:</p>
       </div>
-      <div class="container-lg p-responsive advanced-search-form">
-        <fieldset class="pb-3 mb-4 border-bottom color-border-muted min-width-0">
-          <h3>Advanced options</h3>
-          <dl class="form-group flattened d-flex d-md-block flex-column">
-            <dt><label for="all_include_tags">ALL of these tags</label></dt>
-            <dd><input id="all_include_tags" type="text" class="form-control js-advanced-search-prefix"
-              placeholder="outdoors" data-search-prefix="all_include_tags:"></dd>
-          </dl>
-          <dl class="form-group flattened d-flex d-md-block flex-column">
-            <dt><label for="any_include_tags">ANY of these tags</label></dt>
-            <dd><input id="any_include_tags" type="text" class="form-control js-advanced-search-prefix"
-              value="" placeholder="mine" data-search-prefix="repo:"></dd>
-          </dl>
-          <dl class="form-group flattened d-flex d-md-block flex-column">
-            <dt><label for="exclude_tags">None of the tags</label></dt>
-            <dd><input id="exlude_tags" type="text" class="form-control js-advanced-search-prefix" value="" placeholder=">YYYY-MM-DD, YYYY-MM-DD" data-search-prefix="created:"></dd>
-          </dl>
-        </fieldset>
+      <div id="common-tags">
+        <p>Common tags (tags present on all images):</p>
       </div>
     </div>
     <div id="gallery" style="margin-right:25%">

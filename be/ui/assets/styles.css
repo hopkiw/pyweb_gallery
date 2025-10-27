@@ -19,3 +19,8 @@
   min-width: 100%;
   vertical-align: bottom;
 }
+
+span {
+  display: inline-block;
+  color: blue;
+}

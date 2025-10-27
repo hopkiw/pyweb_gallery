@@ -19,12 +19,17 @@ def create_app():
     def index():
         return render_template('index.html')
 
-    @app.route('/getTags')
+    @app.route('/getTags', methods=['GET', 'POST'])
     def gettags():
         db = TagDB()
+        if request.method == 'POST':
+            image = request.json['image']
+            image_id = db.get_image_by_path(image)
+            return db.get_tags_by_image(image_id)
+
         return db.get_all_tags()
 
-    @app.route('/getImages', methods=["POST"])
+    @app.route('/getImages', methods=['POST'])
     def getimages():
         db = TagDB()
 
