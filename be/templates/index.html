@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="my.js" type="module"></script>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <div class="w3-sidebar w3-bar-block" style="width:25%;right:0">
+      <div>
+        <button id="btn-get-tags" type="button">getTags</button>
+        <button id="btn-get-images" type="button">getImages</button>
+      </div>
+      <form id='form-include-tags'>
+        <label> Tags to include:
+          <input type="text" id='form-include-tags-field' name="include-tags" />
+        </label>
+        <input type="submit" />
+      </form>
+      <div id="include-tags"></div>
+      <form>
+        <label> Tags to exclude:
+          <input type="text" name="exclude-tags" />
+        </label>
+        <input type="submit" />
+      </form>
+      <div id="exclude-tags"></div>
+      <div id="all-tags">
+        <p>All tags:</p>
+      </div>
+      <div class="container-lg p-responsive advanced-search-form">
+        <fieldset class="pb-3 mb-4 border-bottom color-border-muted min-width-0">
+          <h3>Advanced options</h3>
+          <dl class="form-group flattened d-flex d-md-block flex-column">
+            <dt><label for="all_include_tags">ALL of these tags</label></dt>
+            <dd><input id="all_include_tags" type="text" class="form-control js-advanced-search-prefix"
+              placeholder="outdoors" data-search-prefix="all_include_tags:"></dd>
+          </dl>
+          <dl class="form-group flattened d-flex d-md-block flex-column">
+            <dt><label for="any_include_tags">ANY of these tags</label></dt>
+            <dd><input id="any_include_tags" type="text" class="form-control js-advanced-search-prefix"
+              value="" placeholder="mine" data-search-prefix="repo:"></dd>
+          </dl>
+          <dl class="form-group flattened d-flex d-md-block flex-column">
+            <dt><label for="exclude_tags">None of the tags</label></dt>
+            <dd><input id="exlude_tags" type="text" class="form-control js-advanced-search-prefix" value="" placeholder=">YYYY-MM-DD, YYYY-MM-DD" data-search-prefix="created:"></dd>
+          </dl>
+        </fieldset>
+      </div>
+    </div>
+    <div id="gallery" style="margin-right:25%">
+      <div class="container">
+        <img class="portrait mine" src="pictures/a summer place ii.jpg">
+        <img class="portrait mine" src="pictures/mondrian.jpg">
+        <img class="portrait mine" src="pictures/Tumblr_l_166777610372316.jpg">
+        <img class="portrait mine" src="pictures/20240212_152932.jpg">
+        <img class="portrait mine" src="pictures/Tumblr_l_14696474200955.jpg">
+        <img class="portrait mine" src="pictures/666047edcc6a2d1e255395437eb74f95.gif">
+        <img class="portrait mine" src="pictures/27e279512a5224c4a90e9ee6a624f810.gif">
+        <img class="portrait mine" src="pictures/f5729639034738b6947bb49ef6ae082b.gif">
+        <img class="portrait mine" src="pictures/13019dd41a000646eb9eb776acbaf552.jpg">
+        <img class="portrait mine" src="pictures/9611e9231c7936e55d19b4779c0137a1.jpg">
+        <img class="portrait mine" src="pictures/Tumblr_l_5801777545832311.jpg">
+        <img class="portrait mine" src="pictures/1688961449142085.png">
+        <img class="portrait mine" src="pictures/297.jpg">
+        <img class="portrait mine" src="pictures/1716543931526090.jpg">
+        <img class="portrait mine" src="pictures/img_1_1729143244944.jpg">
+        <img class="portrait mine" src="pictures/656ea48c4d1e740198d01cdf6d384b35.jpg">
+        <img class="portrait mine" src="pictures/Tumblr_l_329187477322861.gif">
+        <img class="portrait mine" src="pictures/tumblr_1ad7dd118e66902e2ea376274be8c19f_74a314b3_540.gif.webp">
+        <img class="portrait mine" src="pictures/Tumblr_l_486479256900358.jpg">
+        <img class="portrait mine" src="pictures/Tumblr_l_429099956273341.gif">
+        <img class="portrait mine" src="pictures/1._TFBS.jpg">
+      </div>
+    </div>
+  </body>
+</html>

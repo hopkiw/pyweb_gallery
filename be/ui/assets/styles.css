@@ -1,0 +1,33 @@
+/*
+.container {
+  flex-flow:row wrap;
+}
+
+.container img {
+  object-fit: contain;
+  width:10%;
+  height:10%;
+}
+*/
+
+.container {
+/*
+    height: 75%%;
+    width: 75%;
+*/
+    background-color: red;
+    float: left;
+    overflow: hidden;
+    margin: 20px;
+}
+
+.container img {
+    display: block;
+}
+
+.portrait img {
+    width: 10%;
+
+.landscape img {
+    height: 10%;
+}
