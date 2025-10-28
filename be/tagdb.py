@@ -107,6 +107,31 @@ class TagDB:
 
         return [entry[0] for entry in res.fetchall()]
 
+    def get_images_by_tags(self, tags):
+        cur = self.con.cursor()
+        sql = """
+              SELECT image_path
+              FROM images i"""
+        for i, tag in enumerate(tags):
+            sql += f"""
+              inner join (
+                select image_id
+                from imagetags it
+                join tags t
+                on t.id = it.tag_id
+                where tag = ?
+              ) t{i}
+              on i.id = t{i}.image_id"""
+        sql += ';'
+
+        print('final sql:', sql)
+        print('tags are:', tags)
+        res = cur.execute(sql, tags)
+
+        res = [entry[0] for entry in res.fetchall()]
+        print('final results:', res)
+        return res
+
     def get_tags_by_image(self, image_id):
         cur = self.con.cursor()
         res = cur.execute("""
@@ -115,6 +140,22 @@ class TagDB:
               LEFT JOIN imagetags ON tags.id = imagetags.tag_id
               WHERE image_id = ?""", (image_id,))
 
+        return [entry[0] for entry in res.fetchall()]
+
+    def get_tags_all_images(self, images):
+        cur = self.con.cursor()
+        sql = """
+              SELECT tag
+              FROM tags
+              INNER JOIN imagetags ON imagetags.tag_id = tags.id
+              INNER JOIN images ON imagetags.image_id = images.id
+              WHERE image_path IN ("""
+        for i, image in enumerate(images):
+            if i:
+                sql += ','
+            sql += '?'
+        sql += ');'
+        res = cur.execute(sql, images)
         return [entry[0] for entry in res.fetchall()]
 
     def get_all_tags(self):

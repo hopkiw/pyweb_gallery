@@ -23,9 +23,8 @@ def create_app():
     def gettags():
         db = TagDB()
         if request.method == 'POST':
-            image = request.json['image']
-            image_id = db.get_image_by_path(image)
-            return db.get_tags_by_image(image_id)
+            images = request.json['images']
+            return db.get_tags_all_images(images)
 
         return db.get_all_tags()
 
@@ -33,9 +32,8 @@ def create_app():
     def getimages():
         db = TagDB()
 
-        tag = request.json['tag']
-        tag_id = db.get_tag(tag)
-        return db.get_images_by_tag(tag_id)
+        tags = request.json['tags']
+        return db.get_images_by_tags(tags)
 
     @app.route('/<path:path>')
     def static_file(path):

@@ -8,8 +8,6 @@ var imageResults = [];
 
 var visibleTags = new Set();
 
-var selectedTag = "art";
-
 // TODO: a tag shouldn't ever be in include&exclude simultaneously
 // TODO: AND vs OR tags
 
@@ -28,7 +26,12 @@ async function getAllTags() {
   }
 }
 
-async function getImagesForTag() {
+async function getImagesForTags() {
+  if (includedTags.length == 0) {
+    imageResults = [];
+    return;
+  }
+
   const url = '/getImages';
   try {
     const response = await fetch(url, {
@@ -36,7 +39,7 @@ async function getImagesForTag() {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ tag: selectedTag })
+      body: JSON.stringify({ tags: includedTags })
     });
     if (!response.ok) {
       throw new Error(`Response status: ${response.status}`);
@@ -44,13 +47,17 @@ async function getImagesForTag() {
 
     const result = await response.json();
     imageResults = [...result];
+    console.log('got results:', imageResults);
   } catch (error) {
     console.error(error.message);
   }
 }
 
-async function getTagsForImage(image) {
-  // const url = `/getTags/${image}`;
+async function getTagsForImages(images) {
+  if (images.length == 0) {
+    return [];
+  }
+
   const url = '/getTags';
   try {
     const response = await fetch(url, {
@@ -58,7 +65,7 @@ async function getTagsForImage(image) {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ image: image })
+      body: JSON.stringify({ images: images })
     });
     if (!response.ok) {
       throw new Error(`Response status: ${response.status}`);
@@ -72,21 +79,10 @@ async function getTagsForImage(image) {
 }
 
 async function updateVisibleTagList() {
-  for (var i = 0; i < imageResults.length; i++) {
-    const tags = await getTagsForImage(imageResults[i]);
-    for (var j = 0; j < tags.length; j++) {
-      visibleTags.add(tags[j]);
-    }
-    if (i == 0) {
-      commonTags= [...tags];
-    } else {
-      for (var k = 0; k < commonTags.length; k++) {
-        const tag = commonTags[k];
-        if (!tags.includes(tag)) {
-          commonTags.splice(k, 1);
-        }
-      }
-    }
+  const tags = await getTagsForImages(imageResults);
+  visibleTags.clear();
+  for (var j = 0; j < tags.length; j++) {
+    visibleTags.add(tags[j]);
   }
 
   const div = document.createElement('div');
@@ -100,22 +96,24 @@ async function updateVisibleTagList() {
     const incla = document.createElement('a');
     incla.textContent = '[+]';
     incla.className = 'add-include-tag';
+    incla.addEventListener('click', addIncludeTag, false);
     span.appendChild(incla);
 
     const excla = document.createElement('a');
     excla.textContent = '[-]';
     excla.className = 'add-exclude-tag';
+    excla.addEventListener('click', addExcludeTag, false);
     span.appendChild(excla);
 
     const taga = document.createElement('a');
-    taga.textContent = tag + ' ';
+    taga.textContent = tag;
     span.appendChild(taga);
 
     div.appendChild(span);
   }
 
   document.getElementById('all-tags').replaceChildren(div);
-
+  /*
   const div2 = document.createElement('div');
   const p2 = document.createElement('p');
   p2.textContent = 'Tags common to all images:';
@@ -143,6 +141,7 @@ async function updateVisibleTagList() {
   }
 
   document.getElementById('common-tags').replaceChildren(div2);
+  */
 }
 
 function updateImages() {
@@ -181,7 +180,6 @@ function updateIncludeTagList() {
   }
 
   document.querySelector('#include-tags').replaceChildren(ul);
-  // need to refresh search results
 }
 
 function updateExcludeTagList() {
@@ -203,21 +201,21 @@ function updateExcludeTagList() {
   }
 
   document.querySelector('#exclude-tags').replaceChildren(ul);
-  // need to refresh search results
 }
 
-function addIncludeTag () {
+async function addIncludeTag () {
   // hardcoded expectation of structure
   var tagText = this.nextSibling.nextSibling.text;
   if (!includedTags.includes(tagText)) {
      includedTags.push(tagText);
      updateIncludeTagList();
   }
-  selectedTag = tagText;
+  await getImagesForTags();
   updateImages();
+  await updateVisibleTagList();
 }
 
-function addExcludeTag () {
+async function addExcludeTag () {
   // hardcoded expectation of structure
   var tagText = this.nextSibling.text;
   if (!excludedTags.includes(tagText)) {
@@ -226,21 +224,20 @@ function addExcludeTag () {
   updateExcludeTagList();
 }
 
-function removeIncludeTag () {
+async function removeIncludeTag () {
   // hardcoded expectation of structure
   var tagText = this.nextSibling.text;
-
   includedTags.splice(includedTags.indexOf(tagText), 1);
-
   updateIncludeTagList();
+  await getImagesForTags();
+  updateImages();
+  await updateVisibleTagList();
 }
 
-function removeExcludeTag () {
+async function removeExcludeTag () {
   // hardcoded expectation of structure
   var tagText = this.nextSibling.text;
-
   excludedTags.splice(excludedTags.indexOf(tagText), 1);
-
   updateExcludeTagList();
 }
 
@@ -248,10 +245,10 @@ async function handleForm (e) {
   e.preventDefault();
 
   const field = document.getElementById('form-include-tags-field');
-  selectedTag = field.value;
+  includedTags.push(field.value);
   field.value = '';
   updateIncludeTagList();
-  await getImagesForTag();
+  await getImagesForTags();
   await updateImages();
   await updateVisibleTagList();
 
@@ -259,29 +256,7 @@ async function handleForm (e) {
 
 document.querySelector('#form-include-tags').onsubmit = handleForm;
 
-var addIncludeButtons = document.getElementsByClassName('add-include-tag');
-for (var i = 0; i < addIncludeButtons.length; i++) {
-  addIncludeButtons[i].addEventListener('click', addIncludeTag, false);
-}
-
-var addExcludeButtons = document.getElementsByClassName('add-exclude-tag');
-for (var i = 0; i < addExcludeButtons.length; i++) {
-  addExcludeButtons[i].addEventListener('click', addExcludeTag, false);
-}
-
-var removeIncludeButtons = document.getElementsByClassName('remove-include-tag');
-for (var i = 0; i < removeIncludeButtons.length; i++) {
-  removeIncludeButtons[i].addEventListener('click', removeIncludeTag, false);
-}
-
-var removeExcludeButtons = document.getElementsByClassName('remove-exclude-tag');
-for (var i = 0; i < removeExcludeButtons.length; i++) {
-  removeExcludeButtons[i].addEventListener('click', removeExcludeTag, false);
-}
-
 window.onload = () => {
   getAllTags();
   document.getElementById('form-include-tags-field').focus();
-  // getImages();
-  const gallery = document.querySelector('#gallery');
 };
