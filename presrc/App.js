@@ -5,6 +5,8 @@ import Gallery from './Gallery.js';
 import IncludedTags from './IncludedTags.js';
 import VisibleTags from './VisibleTags.js';
 
+import { DragSelectProvider } from "./DragSelectContext";
+
 export default function App() {
   const [includedTags, setIncludedTags] = useState([]);
   const [excludedTags, setExcludedTags] = useState([]);
@@ -119,11 +121,13 @@ export default function App() {
           removeTagHandler={addExcludedTag}
         />
       </div>
-      <Gallery
-        tags={includedTags}
-        excludedTags={excludedTags}
-        setVisibleTags={updateImageTags}
-      />
+      <DragSelectProvider>
+        <Gallery
+          tags={includedTags}
+          excludedTags={excludedTags}
+          setVisibleTags={updateImageTags}
+        />
+      </DragSelectProvider>
     </>
   );
 }

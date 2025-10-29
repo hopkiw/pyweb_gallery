@@ -1,6 +1,7 @@
 import React from 'react';
-import { useState } from 'react';
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
+
+import { useDragSelect } from "./DragSelectContext";
 
 async function getImagesForTags(tags, excludedTags) {
   const url = '/getImages';
@@ -45,15 +46,25 @@ async function getTagsForImages(images) {
 }
 
 function Image({ src }) {
+  const ds = useDragSelect();
+  const imgEl = useRef(null);
+
+  useEffect(() => {
+    const element = imgEl.current;
+    if (!element || !ds) return;
+    ds.addSelectables(element);
+  }, [ds, imgEl]);
+
   return (
     <div className="item selectable">
-      <img src={src}></img>
+      <img src={src} ref={imgEl} />
     </div>
   );
 }
 
 export default function Gallery({ tags, excludedTags, setVisibleTags }) {
   const [images, setImages] = useState([]);
+
 
   useEffect(() => {
     if (tags) {
