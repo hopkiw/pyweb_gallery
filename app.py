@@ -18,7 +18,6 @@ def main():
     flask_thread = threading.Thread(target=start_flask)
     flask_thread.daemon = True
     flask_thread.start()
-    print("Backend initialization completed!")
 
     # webview.settings["ALLOW_DOWNLOADS"] = True
     webview.create_window(

@@ -25,10 +25,9 @@ export default function App() {
 
   function removeIncludedTag(e) {
     var tagText = e.target.nextSibling.text;
-    console.log('remove tag with text', tagText);
 
     var copy = [...includedTags];
-    copy.splice(includedTags.indexOf(tagText, 1));
+    copy.splice(includedTags.indexOf(tagText), 1);
     setIncludedTags(copy);
   }
 
@@ -61,3 +60,5 @@ export default function App() {
     </>
   );
 }
+
+

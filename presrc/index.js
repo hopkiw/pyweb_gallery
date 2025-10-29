@@ -1,19 +1,6 @@
 /* jshint esversion: 10 */
 
 // TODO: this isn't supposed to be required anymore...?
-import React from 'react';
-import { createRoot } from 'react-dom/client';
-
-import App from './App.js';
-
-// Clear the existing HTML content
-// document.body.innerHTML = '<div id="app"></div>';
-
-// Render your React component instead
-// const root = createRoot(document.getElementById('app'));
-const root = createRoot(document.body);
-
-root.render(<App />);
 
 /*
 import DragSelect from "/DragSelect.esm.js";
@@ -23,7 +10,6 @@ const ds = new DragSelect({
 });
 
 ds.subscribe("DS:end", (e) => {
-  console.log('DS:end', e);
   if (e.items) {
     selectedImages = e.items;
   } else {
@@ -81,7 +67,6 @@ async function getImagesForTags() {
 
     const result = await response.json();
     imageResults = [...result];
-    console.log('got results:', imageResults);
   } catch (error) {
     console.error(error.message);
   }
@@ -270,7 +255,15 @@ async function handleForm (e) {
 document.querySelector('#form-include-tags').onsubmit = handleForm;
 */
 
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+
+import App from './App.js';
+
+// Main entrypoint
+const root = createRoot(document.body);
+root.render(<App />);
+
 window.onload = () => {
-  // getAllTags();
   document.getElementById('form-include-tags-field').focus();
 };
