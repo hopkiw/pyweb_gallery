@@ -23,6 +23,27 @@ async function getImagesForTags(tags) {
   }
 }
 
+async function getTagsForImages(images) {
+  const url = '/getTags';
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ images: images })
+    });
+    if (!response.ok) {
+      throw new Error(`Response status: ${response.status}`);
+    }
+
+    const res = await response.json();
+    return res;
+  } catch (error) {
+    console.error(error.message);
+  }
+}
+
 function Image({ src }) {
   return (
     <div className="item selectable">
@@ -31,7 +52,7 @@ function Image({ src }) {
   );
 }
 
-export default function Gallery({ tags }) {
+export default function Gallery({ tags, setVisibleTags }) {
   const [images, setImages] = useState([]);
 
   useEffect(() => {
@@ -40,6 +61,13 @@ export default function Gallery({ tags }) {
       promise.then( val => setImages(val) );
     } 
   }, [tags]);
+
+  useEffect(() => {
+    if (images) {
+      const promise = getTagsForImages(images);
+      promise.then( val => setVisibleTags(val) );
+    }
+  }, [images]);
 
   var imgItems = [];
   for (const image of images) {

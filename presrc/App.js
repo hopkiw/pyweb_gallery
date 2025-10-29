@@ -3,10 +3,12 @@ import { useState } from 'react';
 
 import Gallery from './Gallery.js';
 import IncludedTags from './IncludedTags.js';
+import VisibleTags from './VisibleTags.js';
 
 export default function App() {
-  const [images, setImages] = useState([]);
   const [includedTags, setIncludedTags] = useState([]);
+  const [visibleTags, setVisibleTags] = useState([]);
+  const [tagsByImage, setTagsByImage] = useState({});
 
   function handleForm(e) {
     e.preventDefault();
@@ -21,6 +23,26 @@ export default function App() {
       }
       field.value = '';
     }
+  }
+
+  function updateImageTags(tags) {
+    const allTags = new Set();
+    for (const [k, v] of Object.entries(tags)) {
+      for (const tag of v) {
+        allTags.add(tag);
+      }
+    }
+    setVisibleTags([...allTags]);
+    setTagsByImage(tags);
+  }
+
+  function addIncludedTag(e) {
+    var tagText = e.target.nextSibling.text;
+
+    setIncludedTags([
+      ...includedTags,
+      tagText
+    ])
   }
 
   function removeIncludedTag(e) {
@@ -44,18 +66,20 @@ export default function App() {
           tags={includedTags}
           removeTagHandler={removeIncludedTag}
         />
-        <div id="include-tags"></div>
         <form>
           <label> Tags to exclude:
             <input type="text" name="exclude-tags" />
           </label>
           <input type="submit" />
         </form>
-        <div id="exclude-tags"></div>
-        <div id="all-tags"></div>
+        <VisibleTags
+          tags={visibleTags}
+          addTagHandler={addIncludedTag}
+        />
       </div>
       <Gallery
         tags={includedTags}
+        setVisibleTags={updateImageTags}
       />
     </>
   );
