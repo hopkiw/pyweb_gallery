@@ -32,8 +32,9 @@ def create_app():
     def getimages():
         db = TagDB()
 
-        tags = request.json['tags']
-        return db.get_images_by_tags(tags)
+        tags = request.json.get('tags')
+        excluded_tags = request.json.get('excludedTags')
+        return db.get_images_by_tags(tags, excluded_tags)
 
     @app.route('/<path:path>')
     def static_file(path):

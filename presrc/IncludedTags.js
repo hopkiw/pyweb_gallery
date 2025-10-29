@@ -4,16 +4,13 @@ import { useState } from 'react';
 import Tag from './Tag.js';
 
 export default function IncludedTags({ tags, removeTagHandler }) {
-  var tagItems = [];
-  if (Array.isArray(tags)) {
-    tagItems = tags.map((tag) =>
-      <Tag
-        tag={tag}
-        removeTagHandler={removeTagHandler}
-        key={tag}
-      />
-    );
-  }
+  const tagItems = tags.map((tag) =>
+    <Tag
+      tag={tag}
+      removeTagHandler={removeTagHandler}
+      key={tag}
+    />
+  );
   return (
     <div id="include-tags">
       {tagItems}

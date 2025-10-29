@@ -2,7 +2,7 @@ import React from 'react';
 import { useState } from 'react';
 import { useEffect } from 'react';
 
-async function getImagesForTags(tags) {
+async function getImagesForTags(tags, excludedTags) {
   const url = '/getImages';
   try {
     const response = await fetch(url, {
@@ -10,7 +10,7 @@ async function getImagesForTags(tags) {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ tags: tags })
+      body: JSON.stringify({ tags: tags, excludedTags: excludedTags })
     });
     if (!response.ok) {
       throw new Error(`Response status: ${response.status}`);
@@ -52,15 +52,15 @@ function Image({ src }) {
   );
 }
 
-export default function Gallery({ tags, setVisibleTags }) {
+export default function Gallery({ tags, excludedTags, setVisibleTags }) {
   const [images, setImages] = useState([]);
 
   useEffect(() => {
     if (tags) {
-      const promise = getImagesForTags(tags);
+      const promise = getImagesForTags(tags, excludedTags);
       promise.then( val => setImages(val) );
     } 
-  }, [tags]);
+  }, [tags, excludedTags]);
 
   useEffect(() => {
     if (images) {

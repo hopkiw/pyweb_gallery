@@ -1,17 +1,5 @@
 #!/usr/bin/env python3
 
-
-# TODO:
-# image_path should be whole path or not?
-# get image by ANY tag. loop over bind to create `tag IN (?, ?, ...)`
-# user should be able to rename, merge, or delete tags
-# renaming to a collision is a merge
-# merge:
-#   for every tag on the second, update it to point to the first
-#   then delete the second
-# what if there's already a tag for one to keep?
-
-
 import argparse
 import hashlib
 import os
@@ -107,9 +95,11 @@ class TagDB:
 
         return [entry[0] for entry in res.fetchall()]
 
-    def get_images_by_tags(self, tags):
+    def get_images_by_tags(self, tags, exclude_tags=None):
         if not tags:
             return []
+        if not exclude_tags:
+            exclude_tags = []
 
         cur = self.con.cursor()
         sql = """
@@ -125,9 +115,18 @@ class TagDB:
                 where tag = ?
               ) t{i}
               on i.id = t{i}.image_id"""
-        sql += ';'
+        for i, exclude in enumerate(exclude_tags):
+            sql += """
+                    WHERE image_id NOT IN (
+                           SELECT image_id
+                             FROM imagetags
+                       INNER JOIN tags
+                               ON tags.id == imagetags.tag_id
+                            WHERE tag = ?)"""
+        print('final sql:', sql)
+        print('exclude_tags are:', exclude_tags)
 
-        res = cur.execute(sql, tags)
+        res = cur.execute(sql, tags + exclude_tags)
 
         return [entry[0] for entry in res.fetchall()]
 

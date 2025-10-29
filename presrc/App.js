@@ -7,10 +7,11 @@ import VisibleTags from './VisibleTags.js';
 
 export default function App() {
   const [includedTags, setIncludedTags] = useState([]);
-  const [visibleTags, setVisibleTags] = useState([]);
+  const [excludedTags, setExcludedTags] = useState([]);
+  const [visibleTags, setVisibleTags] = useState([]);  // TODO: calculate from tagsByImage
   const [tagsByImage, setTagsByImage] = useState({});
 
-  function handleForm(e) {
+  function handleIncludeForm(e) {
     e.preventDefault();
 
     const field = document.getElementById('form-include-tags-field');
@@ -18,6 +19,21 @@ export default function App() {
       if (!includedTags.includes(field.value)) {
         setIncludedTags([
           ...includedTags,
+          field.value
+        ])
+      }
+      field.value = '';
+    }
+  }
+
+  function handleExcludeForm(e) {
+    e.preventDefault();
+
+    const field = document.getElementById('form-exclude-tags-field');
+    if (field.value) {
+      if (!excludedTags.includes(field.value)) {
+        setExcludedTags([
+          ...excludedTags,
           field.value
         ])
       }
@@ -39,10 +55,23 @@ export default function App() {
   function addIncludedTag(e) {
     var tagText = e.target.nextSibling.text;
 
-    setIncludedTags([
-      ...includedTags,
-      tagText
-    ])
+    if (!includedTags.includes(tagText)) {
+      setIncludedTags([
+        ...includedTags,
+        tagText
+      ])
+    }
+  }
+
+  function addExcludedTag(e) {
+    var tagText = e.target.nextSibling.text;
+
+    if (!excludedTags.includes(tagText)) {
+      setExcludedTags([
+        ...excludedTags,
+        tagText
+      ])
+    }
   }
 
   function removeIncludedTag(e) {
@@ -53,6 +82,14 @@ export default function App() {
     setIncludedTags(copy);
   }
 
+  function removeExcludedTag(e) {
+    var tagText = e.target.nextSibling.text;
+
+    var copy = [...excludedTags];
+    copy.splice(excludedTags.indexOf(tagText), 1);
+    setExcludedTags(copy);
+  }
+
   return (
     <>
       <div className="w3-sidebar w3-bar-block searchbar">
@@ -60,29 +97,33 @@ export default function App() {
           <label> Tags to include:
             <input type="text" id='form-include-tags-field' name="include-tags" />
           </label>
-          <input type="submit" onClick={handleForm} />
+          <input type="submit" onClick={handleIncludeForm} />
         </form>
         <IncludedTags 
           tags={includedTags}
           removeTagHandler={removeIncludedTag}
         />
-        <form>
+        <form id='form-exclude-tags'>
           <label> Tags to exclude:
-            <input type="text" name="exclude-tags" />
+            <input type="text" id='form-exclude-tags-field' name="exclude-tags" />
           </label>
-          <input type="submit" />
+          <input type="submit" onClick={handleExcludeForm} />
         </form>
+        <IncludedTags 
+          tags={excludedTags}
+          removeTagHandler={removeExcludedTag}
+        />
         <VisibleTags
           tags={visibleTags}
           addTagHandler={addIncludedTag}
+          removeTagHandler={addExcludedTag}
         />
       </div>
       <Gallery
         tags={includedTags}
+        excludedTags={excludedTags}
         setVisibleTags={updateImageTags}
       />
     </>
   );
 }
-
-
