@@ -1,15 +1,49 @@
 /* jshint esversion: 10 */
 
+// TODO: this isn't supposed to be required anymore...?
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+
+import App from './App.js';
+
+// Clear the existing HTML content
+// document.body.innerHTML = '<div id="app"></div>';
+
+// Render your React component instead
+// const root = createRoot(document.getElementById('app'));
+const root = createRoot(document.body);
+
+root.render(<App />);
+
+/*
+import DragSelect from "/DragSelect.esm.js";
+
+const ds = new DragSelect({
+  draggability: false,
+});
+
+ds.subscribe("DS:end", (e) => {
+  console.log('DS:end', e);
+  if (e.items) {
+    selectedImages = e.items;
+  } else {
+    selectedImages = [];
+  }
+});
+var selectedImages = [];
+*/
+
+/*
 var includedTags = [];
 var excludedTags = [];
 var allTags = [];
 var commonTags = [];
 var imageResults = [];
 
+var imageTags = {};
 var visibleTags = new Set();
 
 // TODO: a tag shouldn't ever be in include&exclude simultaneously
-// TODO: AND vs OR tags
 
 async function getAllTags() {
   const url = '/getTags';
@@ -81,9 +115,12 @@ async function getTagsForImages(images) {
 async function updateVisibleTagList() {
   const tags = await getTagsForImages(imageResults);
   visibleTags.clear();
-  for (var j = 0; j < tags.length; j++) {
-    visibleTags.add(tags[j]);
+  for (const [image, itags] of Object.entries(tags)) {
+    for (var i = 0; i < itags.length; i++) {
+      visibleTags.add(itags[i]);
+    }
   }
+  imageTags = tags;
 
   const div = document.createElement('div');
   const p = document.createElement('p');
@@ -113,44 +150,17 @@ async function updateVisibleTagList() {
   }
 
   document.getElementById('all-tags').replaceChildren(div);
-  /*
-  const div2 = document.createElement('div');
-  const p2 = document.createElement('p');
-  p2.textContent = 'Tags common to all images:';
-  div2.appendChild(p2);
-
-  for (var m = 0; m < commonTags.length; m++) {
-    const span = document.createElement('span');
-
-    const incla = document.createElement('a');
-    incla.textContent = '[+]';
-    incla.className = 'add-include-tag';
-    span.appendChild(incla);
-
-    const excla = document.createElement('a');
-    excla.textContent = '[-]';
-    excla.className = 'add-exclude-tag';
-    span.appendChild(excla);
-
-    const taga = document.createElement('a');
-    taga.textContent = commonTags[m] + ' ';
-    span.appendChild(taga);
-
-    div2.appendChild(span);
-
-  }
-
-  document.getElementById('common-tags').replaceChildren(div2);
-  */
 }
 
 function updateImages() {
   var children = [];
   for (var i = 0; i < imageResults.length; i++) {
     const div = document.createElement('div');
-    div.className = 'item';
+    div.classList.add('item');
+    div.classList.add('selectable');
 
     const img = document.createElement('img');
+    // img.className = 'selectable';
     img.src = imageResults[i];
 
     div.appendChild(img);
@@ -159,6 +169,9 @@ function updateImages() {
 
   const gallery = document.getElementById('gallery');
   gallery.replaceChildren(...children);
+  ds.setSettings({
+    selectables: children,
+  });
 }
 
 function updateIncludeTagList() {
@@ -255,8 +268,9 @@ async function handleForm (e) {
 }
 
 document.querySelector('#form-include-tags').onsubmit = handleForm;
+*/
 
 window.onload = () => {
-  getAllTags();
+  // getAllTags();
   document.getElementById('form-include-tags-field').focus();
 };

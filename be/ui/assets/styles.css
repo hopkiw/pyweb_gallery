@@ -2,6 +2,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 1em;
+  margin-right: 25%;
 }
 
 .item {
@@ -23,4 +24,17 @@
 span {
   display: inline-block;
   color: blue;
+}
+
+.ds-selected {
+  background-color: red;
+  color: red;
+  outline: 3px solid red;
+  outline-offset: 3px;
+  font-weight: bold;
+}
+
+.searchbar {
+  width: 25%;
+  right: 0;
 }
