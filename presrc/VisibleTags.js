@@ -3,7 +3,7 @@ import { useState } from 'react';
 
 import Tag from './Tag.js';
 
-export default function VisibleTags({ tags, addTagHandler, removeTagHandler }) {
+export default function VisibleTags({ title, tags, addTagHandler, removeTagHandler }) {
   const tagItems = tags.map((tag) =>
     <Tag
       tag={tag}
@@ -13,9 +13,12 @@ export default function VisibleTags({ tags, addTagHandler, removeTagHandler }) {
     />
   );
   return (
+    <>
+    <p>{title}</p>
     <div id="visible-tags">
       {tagItems}
     </div>
+    </>
   );
 }
 

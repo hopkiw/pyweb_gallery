@@ -18,6 +18,7 @@ export default function Tag({ tag, addTagHandler, removeTagHandler }) {
       ) : null}
 
       <a>{tag}</a>
+      <a>&nbsp;</a>
     </span>
   );
 }

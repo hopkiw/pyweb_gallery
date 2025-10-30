@@ -62,9 +62,18 @@ function Image({ src }) {
   );
 }
 
-export default function Gallery({ tags, excludedTags, setVisibleTags }) {
+export default function Gallery({ tags, excludedTags, setVisibleTags, setSelectedImages }) {
   const [images, setImages] = useState([]);
+  const ds = useDragSelect();
 
+  useEffect(() => {
+    if (!ds) return;
+    const id = ds.subscribe("DS:end", (e) => {
+      setSelectedImages(e.items);
+    });
+
+    return () => ds.unsubscribe("DS:end", null, id);
+  }, [ds]);
 
   useEffect(() => {
     if (tags) {
@@ -96,4 +105,3 @@ export default function Gallery({ tags, excludedTags, setVisibleTags }) {
     </div>
   );
 }
-

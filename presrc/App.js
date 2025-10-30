@@ -12,6 +12,7 @@ export default function App() {
   const [excludedTags, setExcludedTags] = useState([]);
   const [visibleTags, setVisibleTags] = useState([]);  // TODO: calculate from tagsByImage
   const [tagsByImage, setTagsByImage] = useState({});
+  const [selectedImages, setSelectedImages] = useState([]);
 
   function handleIncludeForm(e) {
     e.preventDefault();
@@ -92,40 +93,63 @@ export default function App() {
     setExcludedTags(copy);
   }
 
+  const selectedTags = [];
+  if (selectedImages && tagsByImage) {
+    console.log('there should be tags for these:', selectedImages);
+    for (const image of selectedImages) {
+      const realImage = image.src.substring(22);
+      if (!(realImage in tagsByImage)) {
+        continue;
+      }
+      for (const tag of tagsByImage[realImage]) {
+        if (!selectedTags.includes(tag)) {
+          selectedTags.push(tag);
+        }
+      }
+    }
+  }
+  console.log('currently selected tags:', selectedTags);
+
   return (
     <>
       <div className="w3-sidebar w3-bar-block searchbar">
         <form id='form-include-tags'>
-          <label> Tags to include:
-            <input type="text" id='form-include-tags-field' name="include-tags" />
-          </label>
+          <input type="text" id='form-include-tags-field' name="include-tags" />
           <input type="submit" onClick={handleIncludeForm} />
         </form>
         <IncludedTags 
+          title='Tags to include:'
           tags={includedTags}
           removeTagHandler={removeIncludedTag}
         />
         <form id='form-exclude-tags'>
-          <label> Tags to exclude:
-            <input type="text" id='form-exclude-tags-field' name="exclude-tags" />
-          </label>
+          <input type="text" id='form-exclude-tags-field' name="exclude-tags" />
           <input type="submit" onClick={handleExcludeForm} />
         </form>
         <IncludedTags 
+          title='Tags to exclude:'
           tags={excludedTags}
           removeTagHandler={removeExcludedTag}
         />
+        <IncludedTags
+          title='Tags on selected:'
+          tags={selectedTags}
+          addTagHandler={addIncludedTag}
+          removeTagHandler={addExcludedTag}
+        />
         <VisibleTags
+          title='All tags:'
           tags={visibleTags}
           addTagHandler={addIncludedTag}
           removeTagHandler={addExcludedTag}
         />
       </div>
-      <DragSelectProvider>
+      <DragSelectProvider settings={{ draggability: false }}>
         <Gallery
           tags={includedTags}
           excludedTags={excludedTags}
           setVisibleTags={updateImageTags}
+          setSelectedImages={setSelectedImages}
         />
       </DragSelectProvider>
     </>
