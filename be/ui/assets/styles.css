@@ -38,3 +38,9 @@ span {
   width: 25%;
   right: 0;
 }
+
+.tags div {
+  min-height: 500px;
+}
+
+div + div { margin-top: 10px; }

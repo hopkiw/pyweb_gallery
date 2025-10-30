@@ -2,7 +2,7 @@ import React from 'react';
 import { useState } from 'react';
 
 import Gallery from './Gallery.js';
-import IncludedTags from './IncludedTags.js';
+import TagBox from './TagBox.js';
 import VisibleTags from './VisibleTags.js';
 
 import { DragSelectProvider } from "./DragSelectContext";
@@ -55,9 +55,7 @@ export default function App() {
     setTagsByImage(tags);
   }
 
-  function addIncludedTag(e) {
-    var tagText = e.target.nextSibling.text;
-
+  function addIncludedTag(e, tagText) {
     if (!includedTags.includes(tagText)) {
       setIncludedTags([
         ...includedTags,
@@ -66,9 +64,8 @@ export default function App() {
     }
   }
 
-  function addExcludedTag(e) {
-    var tagText = e.target.nextSibling.text;
-
+  function addExcludedTag(e, tagText) {
+    console.log('adding tag', tagText, 'to exclude list');
     if (!excludedTags.includes(tagText)) {
       setExcludedTags([
         ...excludedTags,
@@ -77,17 +74,13 @@ export default function App() {
     }
   }
 
-  function removeIncludedTag(e) {
-    var tagText = e.target.nextSibling.text;
-
+  function removeIncludedTag(e, tagText) {
     var copy = [...includedTags];
     copy.splice(includedTags.indexOf(tagText), 1);
     setIncludedTags(copy);
   }
 
-  function removeExcludedTag(e) {
-    var tagText = e.target.nextSibling.text;
-
+  function removeExcludedTag(e, tagText) {
     var copy = [...excludedTags];
     copy.splice(excludedTags.indexOf(tagText), 1);
     setExcludedTags(copy);
@@ -95,7 +88,6 @@ export default function App() {
 
   const selectedTags = [];
   if (selectedImages && tagsByImage) {
-    console.log('there should be tags for these:', selectedImages);
     for (const image of selectedImages) {
       const realImage = image.src.substring(22);
       if (!(realImage in tagsByImage)) {
@@ -108,36 +100,35 @@ export default function App() {
       }
     }
   }
-  console.log('currently selected tags:', selectedTags);
 
   return (
     <>
       <div className="w3-sidebar w3-bar-block searchbar">
         <form id='form-include-tags'>
           <input type="text" id='form-include-tags-field' name="include-tags" />
-          <input type="submit" onClick={handleIncludeForm} />
+          <input type="submit" onClick={handleIncludeForm} hidden />
         </form>
-        <IncludedTags 
+        <TagBox 
           title='Tags to include:'
           tags={includedTags}
           removeTagHandler={removeIncludedTag}
         />
         <form id='form-exclude-tags'>
           <input type="text" id='form-exclude-tags-field' name="exclude-tags" />
-          <input type="submit" onClick={handleExcludeForm} />
+          <input type="submit" onClick={handleExcludeForm} hidden />
         </form>
-        <IncludedTags 
+        <TagBox 
           title='Tags to exclude:'
           tags={excludedTags}
           removeTagHandler={removeExcludedTag}
         />
-        <IncludedTags
+        <TagBox
           title='Tags on selected:'
           tags={selectedTags}
           addTagHandler={addIncludedTag}
           removeTagHandler={addExcludedTag}
         />
-        <VisibleTags
+        <TagBox
           title='All tags:'
           tags={visibleTags}
           addTagHandler={addIncludedTag}

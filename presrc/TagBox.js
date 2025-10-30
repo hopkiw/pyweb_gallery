@@ -3,7 +3,7 @@ import { useState } from 'react';
 
 import Tag from './Tag.js';
 
-export default function VisibleTags({ title, tags, addTagHandler, removeTagHandler }) {
+export default function TagBox({ title, tags, addTagHandler, removeTagHandler }) {
   const tagItems = tags.map((tag) =>
     <Tag
       tag={tag}
@@ -14,8 +14,8 @@ export default function VisibleTags({ title, tags, addTagHandler, removeTagHandl
   );
   return (
     <>
-    <p>{title}</p>
-    <div id="visible-tags">
+    { tagItems.length ? (<p>{title}</p>) : null }
+    <div id='include-tags' className='tags'>
       {tagItems}
     </div>
     </>

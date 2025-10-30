@@ -107,23 +107,26 @@ class TagDB:
               FROM images i"""
         for i, tag in enumerate(tags):
             sql += f"""
-              inner join (
-                select image_id
-                from imagetags it
-                join tags t
-                on t.id = it.tag_id
-                where tag = ?
+              INNER JOIN (
+                SELECT image_id
+                FROM imagetags it
+                JOIN tags t
+                ON t.id = it.tag_id
+                WHERE tag = ?
               ) t{i}
               on i.id = t{i}.image_id"""
         for i, exclude in enumerate(exclude_tags):
-            sql += """
-                    WHERE image_id NOT IN (
+            sql += f"""
+                   {"AND" if i else "WHERE"} """
+            sql += """ i.id NOT IN (
                            SELECT image_id
                              FROM imagetags
                        INNER JOIN tags
                                ON tags.id == imagetags.tag_id
                             WHERE tag = ?)"""
+
         print('final sql:', sql)
+        print('tags are:', tags)
         print('exclude_tags are:', exclude_tags)
 
         res = cur.execute(sql, tags + exclude_tags)
