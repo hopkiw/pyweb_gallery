@@ -1,5 +1,6 @@
-import React, { createContext, useState, useEffect, useContext } from "react";
-import DragSelect from "./DragSelect.esm.js";
+import React, { createContext, useState, useEffect, useContext } from 'react';
+// import DragSelect from './DragSelect.esm.js';
+import DragSelect from 'dragselect';
 
 const Context = createContext(undefined);
 
