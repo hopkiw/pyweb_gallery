@@ -1,11 +1,28 @@
 import React from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import Gallery from './Gallery.js';
 import TagBox from './TagBox.js';
 import VisibleTags from './VisibleTags.js';
 
-import { DragSelectProvider } from "./DragSelectContext";
+import { DragSelectProvider } from './DragSelectContext';
+import TextInput from 'react-autocomplete-input';
+
+
+async function getAllTags() {
+  const url = '/getTags';
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Response status: ${response.status}`);
+    }
+
+    const res = await response.json();
+    return res;
+  } catch (error) {
+    console.error(error.message);
+  }
+}
 
 export default function App() {
   const [includedTags, setIncludedTags] = useState([]);
@@ -13,6 +30,14 @@ export default function App() {
   const [visibleTags, setVisibleTags] = useState([]);  // TODO: calculate from tagsByImage
   const [tagsByImage, setTagsByImage] = useState({});
   const [selectedImages, setSelectedImages] = useState([]);
+  const [allTags, setAllTags] = useState([]);
+
+  useEffect(() => {
+    if (!(allTags.length)) {
+      const promise = getAllTags();
+      promise.then( val =>  setAllTags(val) );
+    }
+  }, [allTags]);
 
   function handleIncludeForm(e) {
     e.preventDefault();
@@ -102,10 +127,18 @@ export default function App() {
 
   return (
     <>
-      <div className="w3-sidebar w3-bar-block searchbar">
+      <div className='w3-sidebar w3-bar-block searchbar'>
         <form id='form-include-tags'>
-          <input type="text" id='form-include-tags-field' name="include-tags" />
-          <input type="submit" onClick={handleIncludeForm} hidden />
+          <TextInput
+            options={allTags}
+            trigger=''
+            spacer=''
+            Component='input'
+            passThroughEnter={true}
+            id='form-include-tags-field'
+            name='include-tags'
+          />
+          <input type='submit' onClick={handleIncludeForm} hidden />
         </form>
         <TagBox 
           title='Tags to include:'
@@ -113,8 +146,16 @@ export default function App() {
           removeTagHandler={removeIncludedTag}
         />
         <form id='form-exclude-tags'>
-          <input type="text" id='form-exclude-tags-field' name="exclude-tags" />
-          <input type="submit" onClick={handleExcludeForm} hidden />
+          <TextInput
+            options={allTags}
+            trigger=''
+            spacer=''
+            Component='input'
+            passThroughEnter={true}
+            id='form-exclude-tags-field'
+            name='exclude-tags'
+          />
+          <input type='submit' onClick={handleExcludeForm} hidden />
         </form>
         <TagBox 
           title='Tags to exclude:'
