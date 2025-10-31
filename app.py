@@ -23,9 +23,9 @@ def main():
     webview.create_window(
         "My App", url="http://localhost:8080", width=1400, height=850
     )
-    # webview.start(debug=True)
-    webview.start()
+    webview.start(debug=('--debug' in sys.argv))
 
 
 if __name__ == "__main__":
+    print(sys.argv)
     main()

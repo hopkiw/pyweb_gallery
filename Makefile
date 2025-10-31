@@ -1,5 +1,9 @@
 all: run
 
+dev: main.js
+	cp main.js be/ui/assets/
+	python app.py --debug
+
 run: main.js
 	cp main.js be/ui/assets/
 	python app.py
