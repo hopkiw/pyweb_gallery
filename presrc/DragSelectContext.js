@@ -3,13 +3,25 @@ import DragSelect from "./DragSelect.esm.js";
 
 const Context = createContext(undefined);
 
+
 function DragSelectProvider({ children, settings = {} }) {
   const [ds, setDS] = useState();
 
   useEffect(() => {
     setDS((prevState) => {
       if (prevState) return prevState;
-      return new DragSelect({});
+      const ds_ = new DragSelect({});
+      ds_.Selection.filterSelected = ({ selectorRect, select: _select, unselect: _unselect }) => {
+        const select = new Map(_select), unselect = new Map(_unselect)
+        if (!(ds_.stores.KeyStore.currentValues.includes('control'))) {
+          select.forEach((boundingRect, element) => {
+            select.delete(element);
+            unselect.set(element, boundingRect);
+          })
+        }
+        return { select, unselect }
+      }
+      return ds_;
     });
     return () => {
       if (ds) {

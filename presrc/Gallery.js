@@ -1,15 +1,15 @@
 import React from 'react';
 import { useEffect, useRef, useState } from 'react';
 
-import { useDragSelect } from "./DragSelectContext";
+import { useDragSelect } from './DragSelectContext';
 
 async function getImagesForTags(tags, excludedTags) {
   const url = '/getImages';
   try {
     const response = await fetch(url, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json"
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({ tags: tags, excludedTags: excludedTags })
     });
@@ -28,9 +28,9 @@ async function getTagsForImages(images) {
   const url = '/getTags';
   try {
     const response = await fetch(url, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json"
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({ images: images })
     });
@@ -56,7 +56,7 @@ function Image({ src }) {
   }, [ds, imgEl]);
 
   return (
-    <div className="item selectable">
+    <div className='item selectable'>
       <img src={src} ref={imgEl} />
     </div>
   );
@@ -70,12 +70,8 @@ export default function Gallery({ tags, excludedTags, setVisibleTags, setSelecte
   useEffect(() => {
     if (!ds) return;
 
-    const endId = ds.subscribe("DS:end", (e) => {
+    const endId = ds.subscribe('DS:end', (e) => {
       setSelectedImages(e.items);
-    });
-
-    const startId = ds.subscribe("DS:start", (e) => {
-      console.log('start dragselect:', e);
     });
 
     ds.setSettings({
@@ -83,10 +79,9 @@ export default function Gallery({ tags, excludedTags, setVisibleTags, setSelecte
     });
 
     return () => {
-      ds.unsubscribe("DS:end", null, endId);
-      ds.unsubscribe("DS:start", null, startId);
+      ds.unsubscribe('DS:end', null, endId);
     }
-  }, [ds]);
+  }, [ds, galleryRef]);
 
   useEffect(() => {
     if (tags) {
@@ -113,7 +108,7 @@ export default function Gallery({ tags, excludedTags, setVisibleTags, setSelecte
   }
 
   return (
-    <div id="gallery" ref={galleryRef}>
+    <div id='gallery' ref={galleryRef}>
       {imgItems}
     </div>
   );
