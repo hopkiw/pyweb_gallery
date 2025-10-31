@@ -64,15 +64,28 @@ function Image({ src }) {
 
 export default function Gallery({ tags, excludedTags, setVisibleTags, setSelectedImages }) {
   const [images, setImages] = useState([]);
+  const galleryRef = useRef(null);
   const ds = useDragSelect();
 
   useEffect(() => {
     if (!ds) return;
-    const id = ds.subscribe("DS:end", (e) => {
+
+    const endId = ds.subscribe("DS:end", (e) => {
       setSelectedImages(e.items);
     });
 
-    return () => ds.unsubscribe("DS:end", null, id);
+    const startId = ds.subscribe("DS:start", (e) => {
+      console.log('start dragselect:', e);
+    });
+
+    ds.setSettings({
+      area: galleryRef.current
+    });
+
+    return () => {
+      ds.unsubscribe("DS:end", null, endId);
+      ds.unsubscribe("DS:start", null, startId);
+    }
   }, [ds]);
 
   useEffect(() => {
@@ -100,7 +113,7 @@ export default function Gallery({ tags, excludedTags, setVisibleTags, setSelecte
   }
 
   return (
-    <div id="gallery">
+    <div id="gallery" ref={galleryRef}>
       {imgItems}
     </div>
   );

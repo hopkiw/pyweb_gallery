@@ -3,6 +3,9 @@ import { useRef } from 'react';
 
 export default function Tag({ tag, addTagHandler, removeTagHandler }) {
   const tagRef = useRef(null);
+  if (!(tag)) {
+    return null;
+  }
 
   return (
     <span>

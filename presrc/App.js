@@ -65,7 +65,6 @@ export default function App() {
   }
 
   function addExcludedTag(e, tagText) {
-    console.log('adding tag', tagText, 'to exclude list');
     if (!excludedTags.includes(tagText)) {
       setExcludedTags([
         ...excludedTags,
