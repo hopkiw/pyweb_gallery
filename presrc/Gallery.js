@@ -1,7 +1,7 @@
 import React from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-// import { useDragSelect } from './DragSelectContext';
+import { useDragSelect } from './DragSelectContext';
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 
@@ -48,16 +48,14 @@ async function getTagsForImages(images) {
 }
 
 function Image({ src, onclick }) {
-  // const ds = useDragSelect();
+  const ds = useDragSelect();
   const imgEl = useRef(null);
 
-  /*
   useEffect(() => {
     const element = imgEl.current;
     if (!element || !ds) return;
     ds.addSelectables(element);
   }, [ds, imgEl]);
-  */
 
   return (
     <div className='item selectable' onClick={onclick}>
@@ -67,12 +65,36 @@ function Image({ src, onclick }) {
 }
 
 export default function Gallery({ tags, excludedTags, setVisibleTags, setSelectedImages }) {
+  const [control, setControl] = useState(false);
   const [images, setImages] = useState([]);
   const [index, setIndex] = useState(-1);
   const galleryRef = useRef(null);
-  // const ds = useDragSelect();
 
-  /*
+  const ds = useDragSelect();
+
+  const keyDownFn = useCallback((event) => {
+    if (event.key === 'Control') {
+      setControl(true);
+    }
+    // ds.setSelection(null) or similar?
+  }, [setControl]);
+
+  const keyUpFn = useCallback((event) => {
+    if (event.key === 'Control') {
+      setControl(false);
+    }
+  }, [setControl]);
+
+  useEffect(() => {
+    document.addEventListener('keydown', keyDownFn, false);
+    document.addEventListener('keyup', keyUpFn, false);
+
+    return () => {
+      document.removeEventListener('keydown', keyDownFn, false);
+      document.removeEventListener('keyup', keyUpFn, false);
+    };
+  }, [keyDownFn, keyUpFn]);
+
   useEffect(() => {
     if (!ds) return;
 
@@ -88,7 +110,6 @@ export default function Gallery({ tags, excludedTags, setVisibleTags, setSelecte
       ds.unsubscribe('DS:end', null, endId);
     }
   }, [ds, galleryRef]);
-  */
 
   useEffect(() => {
     if (tags) {
@@ -107,17 +128,18 @@ export default function Gallery({ tags, excludedTags, setVisibleTags, setSelecte
   const slides = images.map((image) => {
     return { src: image }
   });
-  console.log('generated slides:', slides);
 
   const imgItems = images.map((image, index) => {
     return <Image
       src={image}
       key={image}
-      onclick={(e) => setIndex(index)}
+      onclick={(e) => {
+        if (control === false) {
+          setIndex(index)
+        } 
+      }}
     />
   });
-  console.log('generated imgItems:', imgItems);
-
 
   return (
     <>
@@ -126,7 +148,7 @@ export default function Gallery({ tags, excludedTags, setVisibleTags, setSelecte
       </div>
       <Lightbox
         index={index}
-        open={index >= 0}
+        open={(index >= 0)}
         close={() => setIndex(-1)}
         slides={slides}
       />
