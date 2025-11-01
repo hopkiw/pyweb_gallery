@@ -1,13 +1,18 @@
 import React from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import TextInput from 'react-autocomplete-input';
 
 import Gallery from './Gallery.js';
 import TagBox from './TagBox.js';
-import VisibleTags from './VisibleTags.js';
 
 import { DragSelectProvider } from './DragSelectContext';
-import TextInput from 'react-autocomplete-input';
 
+class MyTextInput extends TextInput {
+  constructor(props) {
+    super(props);
+    this.refInput = props.inputref;
+  }
+}
 
 async function getAllTags() {
   const url = '/getTags';
@@ -32,6 +37,9 @@ export default function App() {
   const [selectedImages, setSelectedImages] = useState([]);
   const [allTags, setAllTags] = useState([]);
 
+  const includeInputRef = useRef(null);
+  const excludeInputRef = useRef(null);
+
   useEffect(() => {
     if (!(allTags.length)) {
       const promise = getAllTags();
@@ -42,22 +50,21 @@ export default function App() {
   function handleIncludeForm(e) {
     e.preventDefault();
 
-    const field = document.getElementById('form-include-tags-field');
-    if (field.value) {
-      if (!includedTags.includes(field.value)) {
-        setIncludedTags([
-          ...includedTags,
-          field.value
-        ])
-      }
-      field.value = '';
+    const field = includeInputRef.current;
+    if (!field || !field.value) return;
+    if (!includedTags.includes(field.value)) {
+      setIncludedTags([
+        ...includedTags,
+        field.value
+      ])
     }
+    field.value = '';
   }
 
   function handleExcludeForm(e) {
     e.preventDefault();
 
-    const field = document.getElementById('form-exclude-tags-field');
+    const field = excludeInputRef.current;
     if (field.value) {
       if (!excludedTags.includes(field.value)) {
         setExcludedTags([
@@ -125,18 +132,23 @@ export default function App() {
     }
   }
 
+  useEffect(() => {
+    const element = includeInputRef.current;
+    if (!element) return;
+    element.focus()
+  }, [includeInputRef]);
+
   return (
     <>
       <div className='w3-sidebar w3-bar-block searchbar'>
         <form id='form-include-tags'>
-          <TextInput
+          <MyTextInput
             options={allTags}
             trigger=''
             spacer=''
             Component='input'
             passThroughEnter={true}
-            id='form-include-tags-field'
-            name='include-tags'
+            inputref={includeInputRef}
           />
           <input type='submit' onClick={handleIncludeForm} hidden />
         </form>
@@ -146,14 +158,13 @@ export default function App() {
           removeTagHandler={removeIncludedTag}
         />
         <form id='form-exclude-tags'>
-          <TextInput
+          <MyTextInput
             options={allTags}
             trigger=''
             spacer=''
             Component='input'
             passThroughEnter={true}
-            id='form-exclude-tags-field'
-            name='exclude-tags'
+            inputref={excludeInputRef}
           />
           <input type='submit' onClick={handleExcludeForm} hidden />
         </form>

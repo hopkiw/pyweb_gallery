@@ -1,7 +1,9 @@
 import React from 'react';
 import { useEffect, useRef, useState } from 'react';
 
-import { useDragSelect } from './DragSelectContext';
+// import { useDragSelect } from './DragSelectContext';
+import Lightbox from "yet-another-react-lightbox";
+import "yet-another-react-lightbox/styles.css";
 
 async function getImagesForTags(tags, excludedTags) {
   const url = '/getImages';
@@ -45,28 +47,32 @@ async function getTagsForImages(images) {
   }
 }
 
-function Image({ src }) {
-  const ds = useDragSelect();
+function Image({ src, onclick }) {
+  // const ds = useDragSelect();
   const imgEl = useRef(null);
 
+  /*
   useEffect(() => {
     const element = imgEl.current;
     if (!element || !ds) return;
     ds.addSelectables(element);
   }, [ds, imgEl]);
+  */
 
   return (
-    <div className='item selectable'>
-      <img src={src} ref={imgEl} />
+    <div className='item selectable' onClick={onclick}>
+      <img src={src} ref={imgEl} className='imgitem' />
     </div>
   );
 }
 
 export default function Gallery({ tags, excludedTags, setVisibleTags, setSelectedImages }) {
   const [images, setImages] = useState([]);
+  const [index, setIndex] = useState(-1);
   const galleryRef = useRef(null);
-  const ds = useDragSelect();
+  // const ds = useDragSelect();
 
+  /*
   useEffect(() => {
     if (!ds) return;
 
@@ -82,6 +88,7 @@ export default function Gallery({ tags, excludedTags, setVisibleTags, setSelecte
       ds.unsubscribe('DS:end', null, endId);
     }
   }, [ds, galleryRef]);
+  */
 
   useEffect(() => {
     if (tags) {
@@ -97,19 +104,32 @@ export default function Gallery({ tags, excludedTags, setVisibleTags, setSelecte
     }
   }, [images]);
 
-  var imgItems = [];
-  for (const image of images) {
-    imgItems.push(
-      <Image
-        src={image}
-        key={image}
-      />
-    );
-  }
+  const slides = images.map((image) => {
+    return { src: image }
+  });
+  console.log('generated slides:', slides);
+
+  const imgItems = images.map((image, index) => {
+    return <Image
+      src={image}
+      key={image}
+      onclick={(e) => setIndex(index)}
+    />
+  });
+  console.log('generated imgItems:', imgItems);
+
 
   return (
-    <div id='gallery' ref={galleryRef}>
-      {imgItems}
-    </div>
+    <>
+      <div id='gallery' ref={galleryRef}>
+        {imgItems}
+      </div>
+      <Lightbox
+        index={index}
+        open={index >= 0}
+        close={() => setIndex(-1)}
+        slides={slides}
+      />
+    </>
   );
 }

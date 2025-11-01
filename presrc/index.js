@@ -8,8 +8,3 @@ import App from './App.js';
 // Main entrypoint
 const root = createRoot(document.body);
 root.render(<App />);
-
-window.onload = () => {
-  // TODO: the form component should focus itself on first load
-  document.getElementById('form-include-tags-field').focus();
-};
