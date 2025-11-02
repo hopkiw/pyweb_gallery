@@ -1,11 +1,13 @@
 import React from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import TextInput from 'react-autocomplete-input';
 
 import Gallery from './Gallery.jsx';
+import SearchBox from './SearchBox.jsx';
 import TagBox from './TagBox.jsx';
 
 import { DragSelectProvider } from './DragSelectContext';
+//import { callPython } from './pythonBridge.js';
 
 class MyTextInput extends TextInput {
   constructor(props) {
@@ -14,6 +16,7 @@ class MyTextInput extends TextInput {
   }
 }
 
+/*
 async function getAllTags() {
   const url = 'http://localhost:8080/getTags';
   try {
@@ -28,6 +31,17 @@ async function getAllTags() {
     console.error(error.message);
   }
 }
+*/
+
+async function getAllTags() {
+  const myprommy = new Promise((resolve, reject) => {
+    resolve( ['tag1', 'tag2', 'another tag'] );
+  });
+  return myprommy;
+    
+  // const res = await callPython('get_tags', []);
+  // return res || [];
+}
 
 export default function App() {
   const [includedTags, setIncludedTags] = useState([]);
@@ -37,44 +51,12 @@ export default function App() {
   const [selectedImages, setSelectedImages] = useState([]);
   const [allTags, setAllTags] = useState([]);
 
-  const includeInputRef = useRef(null);
-  const excludeInputRef = useRef(null);
-
   useEffect(() => {
-    if (!(allTags.length)) {
+    if (!(allTags) || !(allTags.length)) {
       const promise = getAllTags();
       promise.then( val =>  setAllTags(val) );
     }
   }, [allTags]);
-
-  function handleIncludeForm(e) {
-    e.preventDefault();
-
-    const field = includeInputRef.current;
-    if (!field || !field.value) return;
-    if (!includedTags.includes(field.value)) {
-      setIncludedTags([
-        ...includedTags,
-        field.value
-      ])
-    }
-    field.value = '';
-  }
-
-  function handleExcludeForm(e) {
-    e.preventDefault();
-
-    const field = excludeInputRef.current;
-    if (field.value) {
-      if (!excludedTags.includes(field.value)) {
-        setExcludedTags([
-          ...excludedTags,
-          field.value
-        ])
-      }
-      field.value = '';
-    }
-  }
 
   function updateImageTags(tags) {
     const allTags = new Set();
@@ -105,18 +87,6 @@ export default function App() {
     }
   }
 
-  function removeIncludedTag(e, tagText) {
-    var copy = [...includedTags];
-    copy.splice(includedTags.indexOf(tagText), 1);
-    setIncludedTags(copy);
-  }
-
-  function removeExcludedTag(e, tagText) {
-    var copy = [...excludedTags];
-    copy.splice(excludedTags.indexOf(tagText), 1);
-    setExcludedTags(copy);
-  }
-
   const selectedTags = [];
   if (selectedImages && tagsByImage) {
     for (const image of selectedImages) {
@@ -132,55 +102,21 @@ export default function App() {
     }
   }
 
-  useEffect(() => {
-    const element = includeInputRef.current;
-    if (!element) return;
-    element.focus()
-  }, [includeInputRef]);
-
   return (
     <>
       <div className='w3-sidebar w3-bar-block searchbar'>
-        <div className='tagbox'>
-          <form id='form-include-tags'>
-            <MyTextInput
-              options={allTags}
-              trigger=''
-              spacer=''
-              Component='input'
-              passThroughEnter={true}
-              inputref={includeInputRef}
-              placeholder='Tags to include'
-            />
-            <input type='submit' onClick={handleIncludeForm} hidden />
-          </form>
-          <TagBox 
-            id='include-tags'
-            title='Tags to include:'
-            tags={includedTags}
-            removeTagHandler={removeIncludedTag}
-          />
-        </div>
-        <div className='tagbox'>
-          <form id='form-exclude-tags'>
-            <MyTextInput
-              options={allTags}
-              trigger=''
-              spacer=''
-              Component='input'
-              passThroughEnter={true}
-              inputref={excludeInputRef}
-              placeholder='Tags to exclude'
-            />
-            <input type='submit' onClick={handleExcludeForm} hidden />
-          </form>
-          <TagBox 
-            id='exclude-tags'
-            title='Tags to exclude:'
-            tags={excludedTags}
-            removeTagHandler={removeExcludedTag}
-          />
-        </div>
+        <SearchBox
+          tagBoxId='include-tags'
+          allTags={allTags}
+          tags={includedTags}
+          setTags={setIncludedTags}
+        />
+        <SearchBox
+          tagBoxId='exclude-tags'
+          allTags={allTags}
+          tags={excludedTags}
+          setTags={setExcludedTags}
+        />
         <div className='tagbox'>
           <TagBox
             id='selected-tags'
