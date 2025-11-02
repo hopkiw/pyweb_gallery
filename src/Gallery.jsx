@@ -2,9 +2,12 @@ import React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useDragSelect } from './DragSelectContext.jsx';
+//import { callPython } from './pythonBridge.js';
+
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 
+/*
 async function getImagesForTags(tags, excludedTags) {
   const url = 'http://localhost:8080/getImages';
   try {
@@ -22,7 +25,8 @@ async function getImagesForTags(tags, excludedTags) {
     const res = await response.json();
     return res;
   } catch (error) {
-    console.error(error.message);
+    console.error('failure to getImages:', error.message);
+    return [];
   }
 }
 
@@ -43,8 +47,31 @@ async function getTagsForImages(images) {
     const res = await response.json();
     return res;
   } catch (error) {
-    console.error(error.message);
+    console.error('failure to getTags:', error.message);
+    return [];
   }
+}
+*/
+
+async function getTagsForImages(images) {
+  console.log('getTagsForImages:', images);
+  // const myprommy = new Promise((resolve, reject) => {
+  //   resolve({'image1': 'all', 'image2': 'these', 'image3': 'tags'});
+  // });
+  // return myprommy;
+  // const res = await callPython('get_tags', images);
+  // return res || [];
+  return [];
+}
+
+async function getImagesForTags(tags, excludedTags) {
+  console.log('getImagesForTags:', tags, excludedTags);
+  const myprommy = new Promise((resolve, reject) => {
+    resolve([]);
+  });
+  return myprommy;
+  // const res = await callPython('get_images', [tags, excludedTags]);
+  // return res || [];
 }
 
 function Image({ src, onclick }) {
@@ -118,12 +145,16 @@ export default function Gallery({ tags, excludedTags, setVisibleTags, setSelecte
     } 
   }, [tags, excludedTags]);
 
+  /*
   useEffect(() => {
     if (images) {
-      const promise = getTagsForImages(images);
-      promise.then( val => setVisibleTags(val) );
+      // const promise = getTagsForImages(images);
+      // promise.then( val => setVisibleTags(val) );
+      const val = getTagsForImages(images);
+      setVisibleTags(val);
     }
   }, [images, setVisibleTags]);
+  */
 
   const slides = images.map((image) => {
     return { src: image }
@@ -139,6 +170,10 @@ export default function Gallery({ tags, excludedTags, setVisibleTags, setSelecte
         } 
       }}
     />
+  });
+
+  window.addEventListener('pywebviewready', function() {
+    console.log('pywebview is ready:', window.pywebview);
   });
 
   return (
