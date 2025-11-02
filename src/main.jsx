@@ -3,7 +3,8 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 
-import App from './App.js';
+import './index.css'
+import App from './App.jsx';
 
 // Main entrypoint
 const root = createRoot(document.body);

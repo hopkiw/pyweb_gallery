@@ -2,8 +2,8 @@ import React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import TextInput from 'react-autocomplete-input';
 
-import Gallery from './Gallery.js';
-import TagBox from './TagBox.js';
+import Gallery from './Gallery.jsx';
+import TagBox from './TagBox.jsx';
 
 import { DragSelectProvider } from './DragSelectContext';
 
@@ -15,7 +15,7 @@ class MyTextInput extends TextInput {
 }
 
 async function getAllTags() {
-  const url = '/getTags';
+  const url = 'http://localhost:8080/getTags';
   try {
     const response = await fetch(url);
     if (!response.ok) {
@@ -78,7 +78,7 @@ export default function App() {
 
   function updateImageTags(tags) {
     const allTags = new Set();
-    for (const [k, v] of Object.entries(tags)) {
+    for (const v of Object.values(tags)) {
       for (const tag of v) {
         allTags.add(tag);
       }
@@ -141,50 +141,64 @@ export default function App() {
   return (
     <>
       <div className='w3-sidebar w3-bar-block searchbar'>
-        <form id='form-include-tags'>
-          <MyTextInput
-            options={allTags}
-            trigger=''
-            spacer=''
-            Component='input'
-            passThroughEnter={true}
-            inputref={includeInputRef}
+        <div className='tagbox'>
+          <form id='form-include-tags'>
+            <MyTextInput
+              options={allTags}
+              trigger=''
+              spacer=''
+              Component='input'
+              passThroughEnter={true}
+              inputref={includeInputRef}
+              placeholder='Tags to include'
+            />
+            <input type='submit' onClick={handleIncludeForm} hidden />
+          </form>
+          <TagBox 
+            id='include-tags'
+            title='Tags to include:'
+            tags={includedTags}
+            removeTagHandler={removeIncludedTag}
           />
-          <input type='submit' onClick={handleIncludeForm} hidden />
-        </form>
-        <TagBox 
-          title='Tags to include:'
-          tags={includedTags}
-          removeTagHandler={removeIncludedTag}
-        />
-        <form id='form-exclude-tags'>
-          <MyTextInput
-            options={allTags}
-            trigger=''
-            spacer=''
-            Component='input'
-            passThroughEnter={true}
-            inputref={excludeInputRef}
+        </div>
+        <div className='tagbox'>
+          <form id='form-exclude-tags'>
+            <MyTextInput
+              options={allTags}
+              trigger=''
+              spacer=''
+              Component='input'
+              passThroughEnter={true}
+              inputref={excludeInputRef}
+              placeholder='Tags to exclude'
+            />
+            <input type='submit' onClick={handleExcludeForm} hidden />
+          </form>
+          <TagBox 
+            id='exclude-tags'
+            title='Tags to exclude:'
+            tags={excludedTags}
+            removeTagHandler={removeExcludedTag}
           />
-          <input type='submit' onClick={handleExcludeForm} hidden />
-        </form>
-        <TagBox 
-          title='Tags to exclude:'
-          tags={excludedTags}
-          removeTagHandler={removeExcludedTag}
-        />
-        <TagBox
-          title='Tags on selected:'
-          tags={selectedTags}
-          addTagHandler={addIncludedTag}
-          removeTagHandler={addExcludedTag}
-        />
-        <TagBox
-          title='All tags:'
-          tags={visibleTags}
-          addTagHandler={addIncludedTag}
-          removeTagHandler={addExcludedTag}
-        />
+        </div>
+        <div className='tagbox'>
+          <TagBox
+            id='selected-tags'
+            title='Tags on selected:'
+            tags={selectedTags}
+            addTagHandler={addIncludedTag}
+            removeTagHandler={addExcludedTag}
+          />
+        </div>
+        <div className='tagbox'>
+          <TagBox
+            id='all-tags'
+            title='All tags:'
+            tags={visibleTags}
+            addTagHandler={addIncludedTag}
+            removeTagHandler={addExcludedTag}
+          />
+        </div>
       </div>
       <DragSelectProvider settings={{ draggability: false }}>
         <Gallery

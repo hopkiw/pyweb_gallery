@@ -2,7 +2,7 @@ from flask import (
     Flask,
     request,
     send_from_directory,
-    render_template,
+    # render_template,
 )
 from flask_cors import CORS
 
@@ -15,15 +15,16 @@ def create_app():
     app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
     CORS(app)
 
-    @app.route('/')
-    def index():
-        return render_template('index.html')
+    # @app.route('/')
+    # def index():
+    #     return render_template('index.html')
 
     @app.route('/getTags', methods=['GET', 'POST'])
     def gettags():
         db = TagDB()
         if request.method == 'POST':
             images = request.json['images']
+            print('got request for the following images:', images)
             return db.get_tags_all_images(images)
 
         return db.get_all_tags()

@@ -1,12 +1,12 @@
 import React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { useDragSelect } from './DragSelectContext';
+import { useDragSelect } from './DragSelectContext.jsx';
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 
 async function getImagesForTags(tags, excludedTags) {
-  const url = '/getImages';
+  const url = 'http://localhost:8080/getImages';
   try {
     const response = await fetch(url, {
       method: 'POST',
@@ -27,7 +27,7 @@ async function getImagesForTags(tags, excludedTags) {
 }
 
 async function getTagsForImages(images) {
-  const url = '/getTags';
+  const url = 'http://localhost:8080/getTags';
   try {
     const response = await fetch(url, {
       method: 'POST',
@@ -109,7 +109,7 @@ export default function Gallery({ tags, excludedTags, setVisibleTags, setSelecte
     return () => {
       ds.unsubscribe('DS:end', null, endId);
     }
-  }, [ds, galleryRef]);
+  }, [ds, galleryRef, setSelectedImages]);
 
   useEffect(() => {
     if (tags) {
@@ -123,7 +123,7 @@ export default function Gallery({ tags, excludedTags, setVisibleTags, setSelecte
       const promise = getTagsForImages(images);
       promise.then( val => setVisibleTags(val) );
     }
-  }, [images]);
+  }, [images, setVisibleTags]);
 
   const slides = images.map((image) => {
     return { src: image }
@@ -133,7 +133,7 @@ export default function Gallery({ tags, excludedTags, setVisibleTags, setSelecte
     return <Image
       src={image}
       key={image}
-      onclick={(e) => {
+      onclick={() => {
         if (control === false) {
           setIndex(index)
         } 

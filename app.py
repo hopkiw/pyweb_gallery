@@ -21,11 +21,15 @@ def main():
 
     # webview.settings["ALLOW_DOWNLOADS"] = True
     webview.create_window(
-        "My App", url="http://localhost:8080", width=1400, height=850
+        "My App", url="http://localhost:5173", width=1400, height=850
     )
     webview.start(debug=('--debug' in sys.argv))
 
 
+def main_no_ui():
+    start_flask()
+
+
 if __name__ == "__main__":
-    print(sys.argv)
     main()
+    # main_no_ui()

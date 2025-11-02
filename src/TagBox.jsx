@@ -1,9 +1,8 @@
 import React from 'react';
-import { useState } from 'react';
 
-import Tag from './Tag.js';
+import Tag from './Tag.jsx';
 
-export default function TagBox({ title, tags, addTagHandler, removeTagHandler }) {
+export default function TagBox({ id, title, tags, addTagHandler, removeTagHandler }) {
   const tagItems = tags.map((tag) =>
     <Tag
       tag={tag}
@@ -15,7 +14,7 @@ export default function TagBox({ title, tags, addTagHandler, removeTagHandler })
   return (
     <>
     { tagItems.length ? (<p>{title}</p>) : null }
-    <div id='include-tags' className='tags'>
+    <div id={id} className='tags'>
       {tagItems}
     </div>
     </>

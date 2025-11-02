@@ -39,8 +39,8 @@ span {
   right: 0;
 }
 
-.tags div {
-  min-height: 500px;
+.tagbox {
+  margin: 15px;
 }
 
 div + div { margin-top: 10px; }
