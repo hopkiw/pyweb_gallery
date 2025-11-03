@@ -29,6 +29,11 @@ class Api:
         print('got JS request for the following images:', images)
         return db.get_tags_all_images(images)
 
+    def get_all_tags(self, images):
+        db = TagDB()
+        print('got JS request for the following images:', images)
+        return db.get_all_tags()
+
     def get_images(self, options):
         db = TagDB()
         tags, excluded_tags = options
@@ -87,6 +92,7 @@ def main_no_ui():
 
 def main_no_flask():
     window = webview.create_window('pywebview-react boilerplate', 'http://localhost:5173', js_api=Api())
+    # window = webview.create_window('pywebview-react boilerplate', 'dist/index.html', js_api=Api())
     print('Created window', window)
     webview.start(update_ticker, debug=True)
 

@@ -2,7 +2,10 @@ import React from 'react';
 
 import Tag from './Tag.jsx';
 
-export default function TagBox({ id, title, tags, addTagHandler, removeTagHandler }) {
+export default function TagBox({ id, title, tags=[], addTagHandler, removeTagHandler }) {
+  if (!(tags)) {
+    tags = [];
+  }
   const tagItems = tags.map((tag) =>
     <Tag
       tag={tag}

@@ -1,77 +1,22 @@
 import React from 'react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 
 import { useDragSelect } from './DragSelectContext.jsx';
-//import { callPython } from './pythonBridge.js';
+import { callPython } from './pythonBridge.js';
+import { useKeyListener} from './useKeyListener.js';
 
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 
-/*
-async function getImagesForTags(tags, excludedTags) {
-  const url = 'http://localhost:8080/getImages';
-  try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ tags: tags, excludedTags: excludedTags })
-    });
-    if (!response.ok) {
-      throw new Error(`Response status: ${response.status}`);
-    }
-
-    const res = await response.json();
-    return res;
-  } catch (error) {
-    console.error('failure to getImages:', error.message);
-    return [];
-  }
-}
-
-async function getTagsForImages(images) {
-  const url = 'http://localhost:8080/getTags';
-  try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ images: images })
-    });
-    if (!response.ok) {
-      throw new Error(`Response status: ${response.status}`);
-    }
-
-    const res = await response.json();
-    return res;
-  } catch (error) {
-    console.error('failure to getTags:', error.message);
-    return [];
-  }
-}
-*/
 
 async function getTagsForImages(images) {
   console.log('getTagsForImages:', images);
-  // const myprommy = new Promise((resolve, reject) => {
-  //   resolve({'image1': 'all', 'image2': 'these', 'image3': 'tags'});
-  // });
-  // return myprommy;
-  // const res = await callPython('get_tags', images);
-  // return res || [];
-  return [];
+  return callPython('get_tags', images);
 }
 
 async function getImagesForTags(tags, excludedTags) {
   console.log('getImagesForTags:', tags, excludedTags);
-  const myprommy = new Promise((resolve, reject) => {
-    resolve([]);
-  });
-  return myprommy;
-  // const res = await callPython('get_images', [tags, excludedTags]);
-  // return res || [];
+  return callPython('get_images', [tags, excludedTags]);
 }
 
 function Image({ src, onclick }) {
@@ -92,41 +37,22 @@ function Image({ src, onclick }) {
 }
 
 export default function Gallery({ tags, excludedTags, setVisibleTags, setSelectedImages }) {
-  const [control, setControl] = useState(false);
   const [images, setImages] = useState([]);
   const [index, setIndex] = useState(-1);
   const galleryRef = useRef(null);
 
   const ds = useDragSelect();
+  const isControlPressed = useKeyListener();
 
-  const keyDownFn = useCallback((event) => {
-    if (event.key === 'Control') {
-      setControl(true);
-    }
-    // ds.setSelection(null) or similar?
-  }, [setControl]);
-
-  const keyUpFn = useCallback((event) => {
-    if (event.key === 'Control') {
-      setControl(false);
-    }
-  }, [setControl]);
-
-  useEffect(() => {
-    document.addEventListener('keydown', keyDownFn, false);
-    document.addEventListener('keyup', keyUpFn, false);
-
-    return () => {
-      document.removeEventListener('keydown', keyDownFn, false);
-      document.removeEventListener('keyup', keyUpFn, false);
-    };
-  }, [keyDownFn, keyUpFn]);
+  const mySetSelectedImages = useEffectEvent((images) => {
+    setSelectedImages(images);
+  }, [setSelectedImages]);
 
   useEffect(() => {
     if (!ds) return;
 
     const endId = ds.subscribe('DS:end', (e) => {
-      setSelectedImages(e.items);
+      mySetSelectedImages(e.items);
     });
 
     ds.setSettings({
@@ -136,25 +62,37 @@ export default function Gallery({ tags, excludedTags, setVisibleTags, setSelecte
     return () => {
       ds.unsubscribe('DS:end', null, endId);
     }
-  }, [ds, galleryRef, setSelectedImages]);
+  }, [ds, galleryRef]);
 
   useEffect(() => {
+    let ignore = false;
     if (tags) {
-      const promise = getImagesForTags(tags, excludedTags);
-      promise.then( val => setImages(val) );
+      getImagesForTags(tags, excludedTags).then(images => {
+        if (!ignore && images) {
+          setImages(images);
+        }
+      });
     } 
+    return () => {
+      ignore = true;
+    };
   }, [tags, excludedTags]);
 
-  /*
+  const mySetVisibleTags = useEffectEvent((tags) => {
+    setVisibleTags(tags);
+  }, [setVisibleTags]);
+
   useEffect(() => {
-    if (images) {
-      // const promise = getTagsForImages(images);
-      // promise.then( val => setVisibleTags(val) );
-      const val = getTagsForImages(images);
-      setVisibleTags(val);
-    }
-  }, [images, setVisibleTags]);
-  */
+    let ignore = false;
+    getTagsForImages(images).then((tags) => {
+      if (!ignore && tags) {
+        mySetVisibleTags(tags);
+      }
+    });
+    return () => {
+      ignore = true;
+    };
+  }, [images]);
 
   const slides = images.map((image) => {
     return { src: image }
@@ -165,15 +103,11 @@ export default function Gallery({ tags, excludedTags, setVisibleTags, setSelecte
       src={image}
       key={image}
       onclick={() => {
-        if (control === false) {
+        if (!isControlPressed) {
           setIndex(index)
-        } 
+        }
       }}
     />
-  });
-
-  window.addEventListener('pywebviewready', function() {
-    console.log('pywebview is ready:', window.pywebview);
   });
 
   return (

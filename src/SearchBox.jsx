@@ -4,9 +4,7 @@ import TextInput from 'react-autocomplete-input';
 import TagBox from './TagBox.jsx';
 
 export default function SearchBox({ tagBoxId, allTags, tags, setTags }) {
-  // const includeInputRef = useRef(null);
-
-  function handleForm(formData) {
+  const handleForm = (formData) => {
     const input = formData.get('input');
     if (!input) return;
     if (!tags.includes(input)) {
@@ -17,7 +15,7 @@ export default function SearchBox({ tagBoxId, allTags, tags, setTags }) {
     }
   }
 
-  function removeTag(e, tag) {
+  const removeTag = (e, tag) => {
     var copy = [...tags];
     copy.splice(tags.indexOf(tag), 1);
     setTags(copy);
@@ -32,7 +30,7 @@ export default function SearchBox({ tagBoxId, allTags, tags, setTags }) {
           trigger=''
           spacer=''
           Component='input'
-          passThroughEnter={false}
+          passThroughEnter={true}
           placeholder='Tags to include'
         />
         <input type='submit' hidden />

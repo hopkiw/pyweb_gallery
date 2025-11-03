@@ -1,89 +1,55 @@
 import React from 'react';
 import { useEffect, useState } from 'react';
-import TextInput from 'react-autocomplete-input';
 
 import Gallery from './Gallery.jsx';
 import SearchBox from './SearchBox.jsx';
 import TagBox from './TagBox.jsx';
 
 import { DragSelectProvider } from './DragSelectContext';
-//import { callPython } from './pythonBridge.js';
+import { callPython } from './pythonBridge.js';
 
-class MyTextInput extends TextInput {
-  constructor(props) {
-    super(props);
-    this.refInput = props.inputref;
-  }
-}
-
-/*
-async function getAllTags() {
-  const url = 'http://localhost:8080/getTags';
-  try {
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`Response status: ${response.status}`);
-    }
-
-    const res = await response.json();
-    return res;
-  } catch (error) {
-    console.error(error.message);
-  }
-}
-*/
 
 async function getAllTags() {
-  const myprommy = new Promise((resolve, reject) => {
-    resolve( ['tag1', 'tag2', 'another tag'] );
-  });
-  return myprommy;
-    
-  // const res = await callPython('get_tags', []);
-  // return res || [];
+  return callPython('get_all_tags');
 }
 
 export default function App() {
-  const [includedTags, setIncludedTags] = useState([]);
-  const [excludedTags, setExcludedTags] = useState([]);
-  const [visibleTags, setVisibleTags] = useState([]);  // TODO: calculate from tagsByImage
-  const [tagsByImage, setTagsByImage] = useState({});
-  const [selectedImages, setSelectedImages] = useState([]);
   const [allTags, setAllTags] = useState([]);
+  const [excludedTags, setExcludedTags] = useState([]);
+  const [includedTags, setIncludedTags] = useState([]);
+  const [selectedImages, setSelectedImages] = useState([]);
+  const [tagsByImage, setTagsByImage] = useState({});
 
   useEffect(() => {
-    if (!(allTags) || !(allTags.length)) {
-      const promise = getAllTags();
-      promise.then( val =>  setAllTags(val) );
-    }
-  }, [allTags]);
+    console.log('bruv');
+    getAllTags().then(tags => {
+      console.log('finally:', tags);
+      setAllTags(tags);
+    });
+  }, []);
 
-  function updateImageTags(tags) {
-    const allTags = new Set();
-    for (const v of Object.values(tags)) {
-      for (const tag of v) {
-        allTags.add(tag);
-      }
-    }
-    setVisibleTags([...allTags]);
-    setTagsByImage(tags);
-  }
-
-  function addIncludedTag(e, tagText) {
+  const addIncludedTag = (e, tagText) => {
     if (!includedTags.includes(tagText)) {
       setIncludedTags([
         ...includedTags,
         tagText
       ])
     }
-  }
+  };
 
-  function addExcludedTag(e, tagText) {
+  const addExcludedTag = (e, tagText) => {
     if (!excludedTags.includes(tagText)) {
       setExcludedTags([
         ...excludedTags,
         tagText
       ])
+    }
+  };
+
+  const visibleTags = new Set();
+  for (const v of Object.values(tagsByImage)) {
+    for (const tag of v) {
+      visibleTags.add(tag);
     }
   }
 
@@ -130,7 +96,7 @@ export default function App() {
           <TagBox
             id='all-tags'
             title='All tags:'
-            tags={visibleTags}
+            tags={[...visibleTags]}
             addTagHandler={addIncludedTag}
             removeTagHandler={addExcludedTag}
           />
@@ -140,7 +106,7 @@ export default function App() {
         <Gallery
           tags={includedTags}
           excludedTags={excludedTags}
-          setVisibleTags={updateImageTags}
+          setVisibleTags={setTagsByImage}
           setSelectedImages={setSelectedImages}
         />
       </DragSelectProvider>

@@ -16,6 +16,13 @@ export function usePythonState(propName) {
 }
 
 export function callPython(apiName, apiContent) {
-  window.pywebview.api = window.pywebview.api || {}
+  if (!('pywebview' in window)) {
+    console.log('pywebview not ready');
+    return;
+  }
+  if (!('api' in window.pywebview)) {
+    console.log('api not ready');
+    return;
+  }
   return window.pywebview.api[apiName](apiContent)
 }
