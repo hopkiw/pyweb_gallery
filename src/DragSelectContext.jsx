@@ -11,7 +11,7 @@ function DragSelectProvider({ children, settings = {} }) {
     setDS((prevState) => {
       if (prevState) return prevState;
       const ds_ = new DragSelect({});
-      ds_.Selection.filterSelected = ({ selectorRect, select: _select, unselect: _unselect }) => {
+      ds_.Selection.filterSelected = ({ select: _select, unselect: _unselect }) => {
         const select = new Map(_select), unselect = new Map(_unselect)
         if (!(ds_.stores.KeyStore.currentValues.includes('control'))) {
           select.forEach((boundingRect, element) => {

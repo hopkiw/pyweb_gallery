@@ -2,10 +2,8 @@ import React from 'react';
 
 import Tag from './Tag.jsx';
 
-export default function TagBox({ id, title, tags=[], addTagHandler, removeTagHandler }) {
-  if (!(tags)) {
-    tags = [];
-  }
+
+export default function TagBox({ id, title, tags = [], addTagHandler, removeTagHandler }) {
   const tagItems = tags.map((tag) =>
     <Tag
       tag={tag}
@@ -14,13 +12,13 @@ export default function TagBox({ id, title, tags=[], addTagHandler, removeTagHan
       key={tag}
     />
   );
+
   return (
     <>
-    { tagItems.length ? (<p>{title}</p>) : null }
+    { tagItems.length ? ( <p> {title} ({tagItems.length}) </p>) : null }
     <div id={id} className='tags'>
       {tagItems}
     </div>
     </>
   );
 }
-

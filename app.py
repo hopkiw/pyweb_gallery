@@ -2,7 +2,7 @@ import webview
 import threading
 import sys
 
-from time import time
+# from time import time
 
 from be.start import create_app
 from be.tagdb import TagDB
@@ -26,42 +26,42 @@ class Api:
 
     def get_tags(self, images):
         db = TagDB()
-        print('got JS request for the following images:', images)
+        print('got JS request get_tags(images=', images)
         return db.get_tags_all_images(images)
 
-    def get_all_tags(self, images):
+    def get_all_tags(self):
         db = TagDB()
-        print('got JS request for the following images:', images)
+        print('got JS request get_all_tags()')
         return db.get_all_tags()
 
     def get_images(self, options):
         db = TagDB()
         tags, excluded_tags = options
-        print('got JS request for the following tags:', tags, excluded_tags)
+        print(f'got JS request get_images(tags={tags}, excluded_tags={excluded_tags})')
         return db.get_images_by_tags(tags, excluded_tags)
 
 
-def set_interval(interval):
-    def decorator(function):
-        def wrapper(*args, **kwargs):
-            stopped = threading.Event()
-
-            def loop():  # executed in another thread
-                while not stopped.wait(interval):  # until stopped
-                    function(*args, **kwargs)
-
-            t = threading.Thread(target=loop)
-            t.daemon = True  # stop if the program exits
-            t.start()
-            return stopped
-        return wrapper
-    return decorator
-
-
-@set_interval(1)
-def update_ticker():
-    if len(webview.windows) > 0:
-        webview.windows[0].evaluate_js('window.pywebview.state && window.pywebview.state.set_ticker("%d")' % time())
+# def set_interval(interval):
+#     def decorator(function):
+#         def wrapper(*args, **kwargs):
+#             stopped = threading.Event()
+#
+#             def loop():  # executed in another thread
+#                 while not stopped.wait(interval):  # until stopped
+#                     function(*args, **kwargs)
+#
+#             t = threading.Thread(target=loop)
+#             t.daemon = True  # stop if the program exits
+#             t.start()
+#             return stopped
+#         return wrapper
+#     return decorator
+#
+#
+# @set_interval(1)
+# def update_ticker():
+#     if len(webview.windows) > 0:
+#         webview.windows[0].evaluate_js('window.pywebview.state && window.pywebview.state.set_ticker("%d")' % time())
 
 
 def start_flask():
@@ -94,7 +94,11 @@ def main_no_flask():
     window = webview.create_window('pywebview-react boilerplate', 'http://localhost:5173', js_api=Api())
     # window = webview.create_window('pywebview-react boilerplate', 'dist/index.html', js_api=Api())
     print('Created window', window)
-    webview.start(update_ticker, debug=True)
+    # webview.start(update_ticker, debug=True)
+    webview.settings['ALLOW_DOWNLOADS'] = True
+    webview.settings['REMOTE_DEBUGGING_PORT'] = 9222
+    webview.settings['OPEN_DEVTOOLS_IN_DEBUG'] = False
+    webview.start(debug=True, gui='qt')
 
 
 if __name__ == "__main__":

@@ -2,22 +2,11 @@ import React from 'react';
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 
 import { useDragSelect } from './DragSelectContext.jsx';
-import { callPython } from './pythonBridge.js';
 import { useKeyListener} from './useKeyListener.js';
 
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 
-
-async function getTagsForImages(images) {
-  console.log('getTagsForImages:', images);
-  return callPython('get_tags', images);
-}
-
-async function getImagesForTags(tags, excludedTags) {
-  console.log('getImagesForTags:', tags, excludedTags);
-  return callPython('get_images', [tags, excludedTags]);
-}
 
 function Image({ src, onclick }) {
   const ds = useDragSelect();
@@ -36,18 +25,35 @@ function Image({ src, onclick }) {
   );
 }
 
-export default function Gallery({ tags, excludedTags, setVisibleTags, setSelectedImages }) {
+export default function Gallery({ tags, excludedTags, setTagsByImage, setSelectedImages }) {
+  console.log('gallery render for tags', tags);
   const [images, setImages] = useState([]);
   const [index, setIndex] = useState(-1);
+  const [pythonApi, setPythonApi] = useState(undefined); // TODO: extract
   const galleryRef = useRef(null);
+
+  const mySetTagsByImage = useEffectEvent((val) => {
+    setTagsByImage(val);
+  }, [setTagsByImage]);
+
+  const mySetSelectedImages = useEffectEvent((val) => {
+    setSelectedImages(val);
+  }, [setSelectedImages]);
 
   const ds = useDragSelect();
   const isControlPressed = useKeyListener();
 
-  const mySetSelectedImages = useEffectEvent((images) => {
-    setSelectedImages(images);
-  }, [setSelectedImages]);
+  // pythonapi
+  useEffect(() => {
+    const handler = () => { setPythonApi(window.pywebview.api) };
+    window.addEventListener('pywebviewready', handler);
 
+    return () => {
+      window.removeEventListener('pywebviewready', handler);
+    }
+  }, []);
+
+  // dragselect
   useEffect(() => {
     if (!ds) return;
 
@@ -62,37 +68,31 @@ export default function Gallery({ tags, excludedTags, setVisibleTags, setSelecte
     return () => {
       ds.unsubscribe('DS:end', null, endId);
     }
-  }, [ds, galleryRef]);
+  }, [ds, galleryRef, mySetSelectedImages]);
 
+  // get images
   useEffect(() => {
-    let ignore = false;
+    if (!pythonApi) return;
+
     if (tags) {
-      getImagesForTags(tags, excludedTags).then(images => {
-        if (!ignore && images) {
-          setImages(images);
+      pythonApi.get_images([tags, excludedTags]).then((val) => {
+        if (val.length) {
+          setImages(val);
         }
       });
     } 
-    return () => {
-      ignore = true;
-    };
-  }, [tags, excludedTags]);
+  }, [tags, excludedTags, pythonApi]);
 
-  const mySetVisibleTags = useEffectEvent((tags) => {
-    setVisibleTags(tags);
-  }, [setVisibleTags]);
-
+  // get tags
   useEffect(() => {
-    let ignore = false;
-    getTagsForImages(images).then((tags) => {
-      if (!ignore && tags) {
-        mySetVisibleTags(tags);
+    if (!pythonApi) return;
+
+    pythonApi.get_tags(images).then((val) => {
+      if (Object.keys(val).length) {
+        mySetTagsByImage(val);
       }
     });
-    return () => {
-      ignore = true;
-    };
-  }, [images]);
+  }, [images, pythonApi, mySetTagsByImage]);
 
   const slides = images.map((image) => {
     return { src: image }
@@ -112,6 +112,7 @@ export default function Gallery({ tags, excludedTags, setVisibleTags, setSelecte
 
   return (
     <>
+      { imgItems.length ? (<p>Images ({imgItems.length})</p>) : null }
       <div id='gallery' ref={galleryRef}>
         {imgItems}
       </div>
