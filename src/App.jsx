@@ -13,8 +13,11 @@ export default function App() {
   const [allTags, setAllTags] = useState([]);
   const [excludedTags, setExcludedTags] = useState([]);
   const [includedTags, setIncludedTags] = useState([]);
+
+  const [images, setImages] = useState([]);  // TODO: calculate from tagsByImage
   const [selectedImages, setSelectedImages] = useState([]);
-  const [tagsByImage, setTagsByImage] = useState({});
+  const [tagsByImage, setTagsByImage] = useState({});  // NOTE: Do not use in effect deplist.
+
   const [pythonApi, setPythonApi] = useState(undefined); // TODO: extract
 
   const includeInputRef = useRef(null);
@@ -32,6 +35,7 @@ export default function App() {
 
   // get all tags
   useEffect(() => {
+    console.log('app:useEffect: get all tags');
     if (!pythonApi) return;
 
     pythonApi.get_all_tags().then(tags => {
@@ -41,8 +45,33 @@ export default function App() {
     });
   }, [pythonApi, setAllTags]);
 
+  // get tags
+  useEffect(() => {
+    console.log('app:useEffect: get_tags_for_images, images=', images);
+    if (!pythonApi) return;
+
+    console.log('app:useEffect: get_tags_for_images calling python api');
+    pythonApi.get_tags(images).then((val) => {
+      console.log('app:useEffect: get_tags_for_images, promise resolved: got tagsByImage:', val);
+      setTagsByImage(val);
+    });
+  }, [images, pythonApi]);
+
+  // get images
+  useEffect(() => {
+    console.log(`useEffect: get_images include_tags=${includedTags} excludedTags=${excludedTags}`);
+    if (!pythonApi) return;
+
+    console.log('app:useEffect: get_images calling python api');
+    pythonApi.get_images([includedTags, excludedTags]).then((val) => {
+      console.log('app:useEffect: get_images promise resolved: got images:', val);
+      setImages(val);
+    });
+  }, [includedTags, excludedTags, pythonApi]);
+
   // focus input field
   useEffect(() => {
+    console.log('app:useEffect: focus input');
     const element = includeInputRef.current;
     if (!element) return;
     element.focus();
@@ -71,16 +100,18 @@ export default function App() {
 
   // callback
   const removeTagFromImages = (e, tagText) => {
-    console.log(`removeTagFromImages tag:${tagText} images:`, selectedTags);
-    
+    console.log(`EDIT MODE:removeTagFromImages tag:${tagText} images:`, selectedTags);
   }
 
   const visibleTags = new Set();
+  let imgCount = 0;
   for (const v of Object.values(tagsByImage)) {
+    imgCount += 1;
     for (const tag of v) {
       visibleTags.add(tag);
     }
   }
+  console.log(`app.render: there are ${visibleTags.size} tags visible on ${imgCount} images`);
 
   const selectedTags = [];
   if (selectedImages && tagsByImage) {
@@ -133,7 +164,7 @@ export default function App() {
           <div className='tagbox'>
             <TagBox
               id='all-tags'
-              title='All tags'
+              title='Tags on these images'
               tags={[...visibleTags]}
               addTagHandler={addIncludedTag}
               removeTagHandler={addExcludedTag}
@@ -142,9 +173,7 @@ export default function App() {
       </div>
       <DragSelectProvider settings={{ draggability: false }}>
         <Gallery
-          tags={includedTags}
-          excludedTags={excludedTags}
-          setTagsByImage={setTagsByImage}
+          images={images}
           setSelectedImages={setSelectedImages}
         />
       </DragSelectProvider>

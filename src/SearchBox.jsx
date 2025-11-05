@@ -11,6 +11,8 @@ class MyTextInput extends TextInput {
 }
 
 export default function SearchBox({ tagBoxId, title, allTags, tags, setTags, inputref }) {
+  console.log('searchbox render');
+
   // callback
   const handleForm = (formData) => {
     const input = formData.get('input');
@@ -25,10 +27,10 @@ export default function SearchBox({ tagBoxId, title, allTags, tags, setTags, inp
 
   // callback
   const removeTag = (e, tag) => {
-    console.log('pinche chabron you clicked to remove', tag);
-    var copy = [...tags];
-    copy.splice(tags.indexOf(tag), 1);
-    setTags(copy);
+    console.log('searchbox: removeTag:', tag);
+    const newTags = tags.filter(t => t !== tag);
+    console.log('searchbox: setting tags to:', newTags);
+    setTags(newTags);
   }
 
   return (
