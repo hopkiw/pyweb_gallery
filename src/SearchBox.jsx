@@ -1,28 +1,23 @@
 import React from 'react';
-import TextInput from 'react-autocomplete-input';
+import { useState } from 'react';
+import Select from 'react-select';
 
 import TagBox from './TagBox.jsx';
 
-class MyTextInput extends TextInput {
-  constructor(props) {
-    super(props);
-    this.refInput = props.inputref;
-  }
-}
-
 export default function SearchBox({ tagBoxId, title, allTags, tags, setTags, inputref }) {
   console.log('searchbox render');
+  const [value, setValue] = useState(null);
 
-  // callback
-  const handleForm = (formData) => {
-    const input = formData.get('input');
-    if (!input) return;
-    if (!tags.includes(input)) {
+  const handleOnChange = (newTag) => {
+    console.log('searchbox: get new tag:', newTag);
+    if (!newTag) return;
+    if (!tags.includes(newTag.value)) {
       setTags([
         ...tags,
-        input
+        newTag.value
       ])
     }
+    setValue(null);
   }
 
   // callback
@@ -33,21 +28,20 @@ export default function SearchBox({ tagBoxId, title, allTags, tags, setTags, inp
     setTags(newTags);
   }
 
+  const options = allTags.map((t) => {
+    return { 'value': t, 'label': t }
+  });
+
+  console.log('searchbox.render:', options);
+
   return (
     <>
-      <form id='form-include-tags' action={handleForm}>
-        <MyTextInput
-          name='input'
-          options={allTags}
-          trigger=''
-          spacer=''
-          Component='input'
-          passThroughEnter={true}
-          placeholder={title}
-          inputref={inputref}
-        />
-        <input type='submit' hidden />
-      </form>
+      <Select
+        options={options}
+        ref={inputref}
+        onChange={handleOnChange}
+        value={value}
+      />
       <TagBox 
         id={tagBoxId}
         title={title}
