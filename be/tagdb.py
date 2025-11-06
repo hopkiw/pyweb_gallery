@@ -2,7 +2,6 @@
 
 import argparse
 import hashlib
-import os
 import sqlite3
 import sys
 
@@ -34,6 +33,23 @@ class TagDB:
         )""")
         self.con.commit()
 
+    def add_tag_to_images(self, tag, images):
+        cur = self.con.cursor()
+        sql = """
+              INSERT OR IGNORE INTO imagetags (tag_id, image_id)
+              VALUES (
+                       (SELECT id from tags WHERE tag = ?),
+                       (SELECT id FROM images WHERE image_path = ?)
+                     )
+              """
+        vals = list(zip([tag] * len(images), images))
+        print('sql:', sql)
+        print('vals:', vals)
+        cur.executemany(sql, vals)
+        self.con.commit()
+
+        return cur.rowcount
+
     def add_image_tag(self, image_id, tag_id):
         cur = self.con.cursor()
         cur.execute('INSERT OR IGNORE INTO imagetags (image_id, tag_id) VALUES (?, ?)', (image_id, tag_id))
@@ -53,16 +69,22 @@ class TagDB:
         cur.execute('INSERT OR IGNORE INTO tags (tag) VALUES (?)', (tag,))
         self.con.commit()
 
+        return cur.rowcount
+
     def add_image(self, image_path, image_hash):
         cur = self.con.cursor()
         cur.execute('INSERT OR IGNORE INTO images (image_path, image_hash) VALUES (?, ?)',
                     (image_path, image_hash))
         self.con.commit()
 
+        return cur.rowcount
+
     def add_image_list(self, image_list):
         cur = self.con.cursor()
         cur.executemany('INSERT OR IGNORE INTO images (image_path, image_hash) VALUES (?, ?)', image_list)
         self.con.commit()
+
+        return cur.rowcount
 
     def get_tag(self, tag):
         cur = self.con.cursor()
@@ -186,18 +208,29 @@ class TagDB:
 
         return [entry[0] for entry in res.fetchall()]
 
+    def remove_tag_from_images(self, tag, images):
+        cur = self.con.cursor()
+        sql = """
+              DELETE FROM imagetags
+              WHERE tag_id = (
+                SELECT id FROM tags WHERE tag = ?
+              )
+              AND image_id = (
+                SELECT id FROM images WHERE image_path = ?
+              )"""
+
+        vals = list(zip([tag] * len(images), images))
+        print('sql:', sql, 'vals:', vals)
+        cur.executemany(sql, vals)
+        self.con.commit()
+
+        return cur.rowcount
+
 
 def getmd5sum(path):
     with open(path, 'rb') as fh:
         s = fh.read()
     return hashlib.md5(s).hexdigest()
-
-
-def get_symfarm_target(path):
-    if 'symfarm' not in path:
-        return path
-
-    return os.readlink(path).removeprefix('/mnt/myvol/00-pictures/')
 
 
 def main():
@@ -237,17 +270,6 @@ def main():
                 print(f'images with tags: {args.tag}')
                 for image in db.get_images_all_tags(args.tag):
                     print(image)
-
-            return 0
-
-        if args.path:
-            path = args.path
-            if 'symfarm' in path:
-                path = get_symfarm_target(path)
-            image_id = db.get_image_by_path(path)
-            print(f'tags for file "{path}":')
-            for tag in db.get_tags_by_image(image_id):
-                print(tag)
 
             return 0
 

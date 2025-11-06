@@ -35,10 +35,27 @@ class Api:
         return db.get_all_tags()
 
     def get_images(self, options):
-        db = TagDB()
         tags, excluded_tags = options
+        db = TagDB()
         print(f'got JS request get_images(tags={tags}, excluded_tags={excluded_tags})')
         return db.get_images_by_tags(tags, excluded_tags)
+
+    def remove_tag_from_images(self, tag, images):
+        # tag, images = options
+        db = TagDB()
+        print(f'got JS request remove_tag_from_images(tag={tag}, images={images})')
+        return db.remove_tag_from_images(tag, images)
+        # return len(images)
+
+    def create_tag(self, tag):
+        db = TagDB()
+        print(f'got JS request create_tag({tag})')
+        return db.add_tag(tag)
+
+    def add_tag_to_images(self, tag, images):
+        db = TagDB()
+        print(f'got JS request add_tag_to_images(tag={tag}, images={images})')
+        return db.add_tag_to_images(tag, images)
 
 
 # def set_interval(interval):

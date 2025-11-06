@@ -73,7 +73,6 @@ export default function Gallery({ images, setSelectedImages }) {
 
   return (
     <>
-      { imgItems.length ? (<><p>Images ({imgItems.length})</p><hr /></>) : null }
       <div id='gallery' ref={galleryRef}>
         {imgItems}
       </div>

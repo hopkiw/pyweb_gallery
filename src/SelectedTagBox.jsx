@@ -1,13 +1,37 @@
 import React from 'react';
 import { useState } from 'react';
 
+import CreatableSelect from 'react-select/creatable';
+
 import Tag from './Tag.jsx';
 import SvgIconEdit from './SvgIconEdit.jsx';
 import SvgIconEditOutline from './SvgIconEditOutline.jsx';
+import SvgIconPencilAdd from './SvgIconPencilAdd.jsx';
 
 
-export default function SelectedTagBox({ id, title, tags = [], addTagHandler, removeTagHandler, removeEditableHandler }) {
+export default function SelectedTagBox({ 
+  id,
+  title,
+  tags = [],
+  allTags,
+  addTagHandler,
+  changeHandler,
+  createTag,
+  removeTagHandler,
+  removeEditableHandler 
+}) {
   const [editing, setEditing] = useState(false);
+  const [adding, setAdding] = useState(false);
+  const [addTagValue, setAddTagValue] = useState(false);
+
+  // callback
+  const handleChange = (e) => {
+    if (!e || !e.value) return;
+
+    console.log('SelectedTagBox.handleChange:', e.value);
+    changeHandler(e.value);
+    setAddTagValue('');
+  };
 
   const tagItems = tags.map((tag) =>
     <Tag
@@ -19,22 +43,29 @@ export default function SelectedTagBox({ id, title, tags = [], addTagHandler, re
     />
   );
 
-  const header = (
+  return (
     <>
+    { tagItems.length ? (
       <p>
         {title} ({tagItems.length})
         <a onClick={() => setEditing(!editing)}>
           { editing ? <SvgIconEdit /> : <SvgIconEditOutline /> }
         </a>
-      </p>
-    </>
-  );
-
-  return (
-    <>
-    { tagItems.length ? (header) : null }
+        <a onClick={() => setAdding(!adding)}>
+          <SvgIconPencilAdd />
+        </a>
+      </p> ) : null }
     <div id={id} className='tags'>
       {tagItems}
+      { adding ? (
+        <CreatableSelect
+          isClearable
+          onChange={handleChange}
+          onCreateOption={createTag}
+          options={allTags.map(t => ({ label: t, value: t }))}
+          value={addTagValue}
+        />
+      ) : null }
     </div>
     </>
   );

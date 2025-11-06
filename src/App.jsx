@@ -100,7 +100,61 @@ export default function App() {
 
   // callback
   const removeTagFromImages = (e, tagText) => {
-    console.log(`EDIT MODE:removeTagFromImages tag:${tagText} images:`, selectedTags);
+    console.log(`EDIT MODE:removeTagFromImages tag:${tagText} images:`, selectedImages);
+    if (!pythonApi) return;
+
+    const selectedImagePaths = selectedImages.map((image) => {
+      return image.src.substring(22);
+    });
+
+    pythonApi.remove_tag_from_images(tagText, selectedImagePaths).then((count) => {
+      console.log('we removed ', count, ' tags from db, removing from state.');
+      if (!count) return;
+
+      const copy = { ...tagsByImage };
+      for (const image of selectedImagePaths) {
+        const tags = copy[image];
+        console.log('tags on', image, ': ', tags);
+        tags.splice(tags.indexOf(tagText), 1);
+        copy[image] = tags;
+      }
+      setTagsByImage(copy);
+    });
+  }
+
+  // callback
+  const addTagToImages = (tagText) => {
+    console.log(`EDIT MODE:addTagToImages tag:${tagText} images:`, selectedImages);
+    if (!pythonApi) return;
+
+    const selectedImagePaths = selectedImages.map((image) => {
+      return image.src.substring(22);
+    });
+
+    pythonApi.add_tag_to_images(tagText, selectedImagePaths).then((count) => {
+      console.log('we added', count, ' imagetags to db, updating state.');
+      if (!count) return;
+
+      const copy = { ...tagsByImage };
+      for (const image of selectedImagePaths) {
+        const tags = copy[image];
+        console.log('tags on', image, ': ', tags);
+        copy[image] = [...tags, tagText];
+      }
+      setTagsByImage(copy);
+    });
+  }
+
+  const createTag = (tagText) => {
+    console.log(`EDIT MODE:createTag(${tagText}`);
+    if (!pythonApi) return;
+
+    pythonApi.create_tag(tagText).then((count) => {
+      console.log('we create', count, 'tags in db, adding to state.');
+      if (!count) return;
+
+      setAllTags([...allTags, tagText]);
+    });
   }
 
   const visibleTags = new Set();
@@ -156,6 +210,9 @@ export default function App() {
               id='selected-tags'
               title='Tags on selected'
               tags={selectedTags}
+              allTags={allTags}
+              changeHandler={addTagToImages}
+              createTag={createTag}
               addTagHandler={addIncludedTag}
               removeTagHandler={addExcludedTag}
               removeEditableHandler={removeTagFromImages}
@@ -172,6 +229,8 @@ export default function App() {
           </div>
       </div>
       <DragSelectProvider settings={{ draggability: false }}>
+        <p>&nbsp;&nbsp;Images ({images.length})</p>
+        <hr />
         <Gallery
           images={images}
           setSelectedImages={setSelectedImages}
