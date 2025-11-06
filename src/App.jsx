@@ -63,7 +63,7 @@ export default function App() {
     if (!pythonApi) return;
 
     console.log('app:useEffect: get_images calling python api');
-    pythonApi.get_images([includedTags, excludedTags]).then((val) => {
+    pythonApi.get_images(includedTags, excludedTags).then((val) => {
       console.log('app:useEffect: get_images promise resolved: got images:', val);
       setImages(val);
     });
@@ -232,7 +232,7 @@ export default function App() {
           </div>
       </div>
       <DragSelectProvider settings={{ draggability: false }}>
-        <p>&nbsp;&nbsp;Images ({images.length}) { selectedImages.length ? ((selectedImages.length)) : null }</p>
+        <p>&nbsp;&nbsp;Images ({images.length}) { selectedImages.length ? ( `(${selectedImages.length} selected)` ) : null }</p>
         <hr />
         <Gallery
           images={images}

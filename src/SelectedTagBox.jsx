@@ -4,9 +4,9 @@ import { useState } from 'react';
 import CreatableSelect from 'react-select/creatable';
 
 import Tag from './Tag.jsx';
-import SvgIconEdit from './SvgIconEdit.jsx';
-import SvgIconEditOutline from './SvgIconEditOutline.jsx';
-import SvgIconPencilAdd from './SvgIconPencilAdd.jsx';
+import SvgIconEdit from './icons/SvgIconEdit.jsx';
+import SvgIconEditOutline from './icons/SvgIconEditOutline.jsx';
+import SvgIconPencilAdd from './icons/SvgIconPencilAdd.jsx';
 
 
 export default function SelectedTagBox({ 
