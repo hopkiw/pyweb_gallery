@@ -65,6 +65,7 @@ export default function Gallery({ images, setSelectedImages }) {
       key={image}
       onclick={() => {
         if (!isControlPressed) {
+          console.log('selecting index', index);
           setIndex(index)
         }
       }}

@@ -45,16 +45,15 @@ export default function SelectedTagBox({
 
   return (
     <>
-    { tagItems.length ? (
-      <p>
-        {title} ({tagItems.length})
-        <a onClick={() => setEditing(!editing)}>
-          { editing ? <SvgIconEdit /> : <SvgIconEditOutline /> }
-        </a>
-        <a onClick={() => setAdding(!adding)}>
-          <SvgIconPencilAdd />
-        </a>
-      </p> ) : null }
+    <p>
+      {title} ({tagItems.length})
+      <a onClick={() => setEditing(!editing)}>
+        { editing ? <SvgIconEdit /> : <SvgIconEditOutline /> }
+      </a>
+      <a onClick={() => setAdding(!adding)}>
+        <SvgIconPencilAdd />
+      </a>
+    </p> 
     <div id={id} className='tags'>
       {tagItems}
       { adding ? (

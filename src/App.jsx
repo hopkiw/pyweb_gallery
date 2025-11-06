@@ -171,9 +171,12 @@ export default function App() {
   if (selectedImages && tagsByImage) {
     for (const image of selectedImages) {
       const realImage = image.src.substring(22);
+      console.log('checking for tags on', realImage);
       if (!(realImage in tagsByImage)) {
+        console.log('no tags sorry', realImage);
         continue;
       }
+      console.log('found tags', tagsByImage[realImage]);
       for (const tag of tagsByImage[realImage]) {
         if (!selectedTags.includes(tag)) {
           selectedTags.push(tag);
@@ -229,7 +232,7 @@ export default function App() {
           </div>
       </div>
       <DragSelectProvider settings={{ draggability: false }}>
-        <p>&nbsp;&nbsp;Images ({images.length})</p>
+        <p>&nbsp;&nbsp;Images ({images.length}) { selectedImages.length ? ((selectedImages.length)) : null }</p>
         <hr />
         <Gallery
           images={images}
