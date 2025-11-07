@@ -7,6 +7,7 @@ import SelectedTagBox from './SelectedTagBox.jsx';
 import TagBox from './TagBox.jsx';
 
 import { DragSelectProvider } from './DragSelectContext';
+import { usePythonApi } from './usePythonApi';
 
 function getRealImagePath(image) {
   const url = new URL(image);
@@ -22,20 +23,11 @@ export default function App() {
   const [selectedImages, setSelectedImages] = useState([]);
   const [tagsByImage, setTagsByImage] = useState({});  // NOTE: Do not use in effect deplist.
 
-  const [pythonApi, setPythonApi] = useState(undefined); // TODO: extract
-
   const includeInputRef = useRef(null);
   const excludeInputRef = useRef(null);
 
   // pythonApi
-  useEffect(() => {
-    const handler = () => { setPythonApi(window.pywebview.api) };
-    window.addEventListener('pywebviewready', handler);
-
-    return () => {
-      window.removeEventListener('pywebviewready', handler);
-    }
-  }, [setPythonApi]);
+  const pythonApi = usePythonApi();
 
   // get all tags
   useEffect(() => {
