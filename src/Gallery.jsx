@@ -55,9 +55,7 @@ export default function Gallery({ images, setSelectedImages }) {
     }
   }, [ds, galleryRef, mySetSelectedImages]);
 
-  const slides = images.map((image) => {
-    return { src: image }
-  });
+  const slides = images.map((image) => ({src: image }));
 
   const imgItems = images.map((image, index) => {
     return <Image

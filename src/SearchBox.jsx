@@ -29,9 +29,7 @@ export default function SearchBox({ tagBoxId, title, allTags, tags, setTags, inp
     setTags(newTags);
   }
 
-  const options = allTags.map((t) => {
-    return { 'value': t, 'label': t }
-  });
+  const options = allTags.map((t) => ({'value': t, 'label': t }));
 
   console.log('searchbox.render options:', options);
 
