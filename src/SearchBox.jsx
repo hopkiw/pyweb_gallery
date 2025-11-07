@@ -21,9 +21,9 @@ export default function SearchBox({ tagBoxId, title, allTags, tags, setTags, inp
   }
 
   // callback
-  const removeTag = (e, tag) => {
-    console.log('searchbox: removeTag:', tag);
-    const newTags = tags.filter(t => t !== tag);
+  const removeTag = (val) => {
+    console.log('searchbox: removeTag:', val.tagText);
+    const newTags = tags.filter(t => t !== val.tagText);
     console.log('searchbox: setting tags to:', newTags);
     setTags(newTags);
   }

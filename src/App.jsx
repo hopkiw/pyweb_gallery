@@ -8,13 +8,17 @@ import TagBox from './TagBox.jsx';
 
 import { DragSelectProvider } from './DragSelectContext';
 
+function getRealImagePath(image) {
+  const url = new URL(image);
+  return decodeURI(url.pathname).substring(1);
+}
+
 export default function App() {
   console.log('app render');
   const [allTags, setAllTags] = useState([]);
   const [excludedTags, setExcludedTags] = useState([]);
   const [includedTags, setIncludedTags] = useState([]);
 
-  const [images, setImages] = useState([]);  // TODO: calculate from tagsByImage
   const [selectedImages, setSelectedImages] = useState([]);
   const [tagsByImage, setTagsByImage] = useState({});  // NOTE: Do not use in effect deplist.
 
@@ -45,27 +49,19 @@ export default function App() {
     });
   }, [pythonApi, setAllTags]);
 
-  // get tags
-  useEffect(() => {
-    console.log('app:useEffect: get_tags_for_images, images=', images);
-    if (!pythonApi) return;
-
-    console.log('app:useEffect: get_tags_for_images calling python api');
-    pythonApi.get_tags(images).then((val) => {
-      console.log('app:useEffect: get_tags_for_images, promise resolved: got tagsByImage:', val);
-      setTagsByImage(val);
-    });
-  }, [images, pythonApi]);
-
   // get images
   useEffect(() => {
     console.log(`useEffect: get_images include_tags=${includedTags} excludedTags=${excludedTags}`);
     if (!pythonApi) return;
 
-    console.log('app:useEffect: get_images calling python api');
-    pythonApi.get_images(includedTags, excludedTags).then((val) => {
-      console.log('app:useEffect: get_images promise resolved: got images:', val);
-      setImages(val);
+    console.log('app:useEffect: get_images calling python api', includedTags, excludedTags);
+    pythonApi.get_images(includedTags, excludedTags).then((images) => {
+      console.log('app:useEffect: get_images promise resolved: got images:', images);
+      pythonApi.get_tags(images).then((newtagsbyimage) => {
+        console.log('app:useEffect: get_tags_for_images, promise resolved: got tagsByImage:', 
+          newtagsbyimage);
+        setTagsByImage(newtagsbyimage);
+      });
     });
   }, [includedTags, excludedTags, pythonApi]);
 
@@ -77,9 +73,8 @@ export default function App() {
     element.focus();
   }, []);
 
-  // TODO: use object explode instead of 2 params
   // callback
-  const addIncludedTag = (e, tagText) => {
+  const addIncludedTag = ({ tagText }) => {
     if (!includedTags.includes(tagText)) {
       setIncludedTags([
         ...includedTags,
@@ -89,7 +84,7 @@ export default function App() {
   };
 
   // callback
-  const addExcludedTag = (e, tagText) => {
+  const addExcludedTag = ({ tagText }) => {
     if (!excludedTags.includes(tagText)) {
       setExcludedTags([
         ...excludedTags,
@@ -99,12 +94,12 @@ export default function App() {
   };
 
   // callback
-  const removeTagFromImages = (e, tagText) => {
+  const removeTagFromImages = ({ tagText }) => {
     console.log(`EDIT MODE:removeTagFromImages tag:${tagText} images:`, selectedImages);
     if (!pythonApi) return;
 
     const selectedImagePaths = selectedImages.map((image) => {
-      return image.src.substring(22);
+      return getRealImagePath(image.src);
     });
 
     pythonApi.remove_tag_from_images(tagText, selectedImagePaths).then((count) => {
@@ -123,12 +118,12 @@ export default function App() {
   }
 
   // callback
-  const addTagToImages = (tagText) => {
+  const addTagToImages = ({ tagText }) => {
     console.log(`EDIT MODE:addTagToImages tag:${tagText} images:`, selectedImages);
     if (!pythonApi) return;
 
     const selectedImagePaths = selectedImages.map((image) => {
-      return image.src.substring(22);
+      return getRealImagePath(image.src);
     });
 
     pythonApi.add_tag_to_images(tagText, selectedImagePaths).then((count) => {
@@ -145,7 +140,8 @@ export default function App() {
     });
   }
 
-  const createTag = (tagText) => {
+  // callback
+  const createTag = ({ tagText }) => {
     console.log(`EDIT MODE:createTag(${tagText}`);
     if (!pythonApi) return;
 
@@ -167,10 +163,12 @@ export default function App() {
   }
   console.log(`app.render: there are ${visibleTags.size} tags visible on ${imgCount} images`);
 
+  const images = Object.keys(tagsByImage);
+
   const selectedTags = [];
   if (selectedImages && tagsByImage) {
     for (const image of selectedImages) {
-      const realImage = image.src.substring(22);
+      const realImage = getRealImagePath(image.src);
       console.log('checking for tags on', realImage);
       if (!(realImage in tagsByImage)) {
         console.log('no tags sorry', realImage);
@@ -232,7 +230,9 @@ export default function App() {
           </div>
       </div>
       <DragSelectProvider settings={{ draggability: false }}>
-        <p>&nbsp;&nbsp;Images ({images.length}) { selectedImages.length ? ( `(${selectedImages.length} selected)` ) : null }</p>
+        <p>&nbsp;&nbsp;Images ({images.length}) { selectedImages.length ? ( 
+          `(${selectedImages.length} selected)` 
+        ) : null }</p>
         <hr />
         <Gallery
           images={images}

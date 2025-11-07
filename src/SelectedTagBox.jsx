@@ -29,7 +29,7 @@ export default function SelectedTagBox({
     if (!e || !e.value) return;
 
     console.log('SelectedTagBox.handleChange:', e.value);
-    changeHandler(e.value);
+    changeHandler({ tagText: e.value });
     setAddTagValue('');
   };
 
@@ -45,6 +45,7 @@ export default function SelectedTagBox({
 
   return (
     <>
+    { tagItems.length? (
     <p>
       {title} ({tagItems.length})
       <a onClick={() => setEditing(!editing)}>
@@ -54,6 +55,7 @@ export default function SelectedTagBox({
         <SvgIconPencilAdd />
       </a>
     </p> 
+    ) : null }
     <div id={id} className='tags'>
       {tagItems}
       { adding ? (

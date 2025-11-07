@@ -24,7 +24,6 @@ class Api:
         db = TagDB()
         print(f'got JS request remove_tag_from_images(tag={tag}, images={images})')
         return db.remove_tag_from_images(tag, images)
-        # return len(images)
 
     def create_tag(self, tag):
         db = TagDB()
