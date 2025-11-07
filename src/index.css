@@ -1,8 +1,19 @@
-#gallery {
+.gallery {
   display: flex;
   flex-wrap: wrap;
   gap: 1em;
   margin-right: 25%;
+}
+
+.swiper_gallery {
+  margin-right: 25%;
+}
+
+.swiper_gallery img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  object-fit: contain;
 }
 
 .item {

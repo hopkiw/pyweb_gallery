@@ -26,7 +26,7 @@ export default function SelectedTagBox({
 
   // callback
   const handleChange = ({ value: tagText }) => {
-    if (tagText) return;
+    if (!tagText) return;
 
     console.log('SelectedTagBox.handleChange:', tagText);
     changeHandler({ tagText });
@@ -62,7 +62,7 @@ export default function SelectedTagBox({
         <CreatableSelect
           isClearable
           onChange={handleChange}
-          onCreateOption={createTag}
+          onCreateOption={(tagText) => createTag({ tagText })}
           options={allTags.map(t => ({ label: t, value: t }))}
           value={addTagValue}
         />

@@ -1,11 +1,13 @@
 import React from 'react';
-import { useEffect, useEffectEvent, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 
 import { useDragSelect } from './DragSelectContext.jsx';
-import { useKeyListener} from './useKeyListener.js';
 
-import Lightbox from "yet-another-react-lightbox";
-import "yet-another-react-lightbox/styles.css";
+
+function getRealImagePath(image) {
+  const url = new URL(image);
+  return decodeURI(url.pathname).substring(1);
+}
 
 
 function Image({ src, onclick }) {
@@ -25,25 +27,22 @@ function Image({ src, onclick }) {
   );
 }
 
-export default function Gallery({ images, setSelectedImages }) {
+export default function Gallery({ images, selectedCount, setIndex, setSelectedImages }) {
   console.log('gallery render');
-  const [index, setIndex] = useState(-1);
   const galleryRef = useRef(null);
 
-  const mySetSelectedImages = useEffectEvent((val) => {
-    setSelectedImages(val);
-  }, [setSelectedImages]);
-
   const ds = useDragSelect();
-  const isControlPressed = useKeyListener();
 
   // dragselect
   useEffect(() => {
     console.log('gallery:useEffect: dragselect');
     if (!ds) return;
 
-    const endId = ds.subscribe('DS:end', (e) => {
-      mySetSelectedImages(e.items);
+    const endId = ds.subscribe('DS:end', ({ items }) => {
+      const selected = items.map(({ src }) => {
+        return getRealImagePath(src);
+      });
+      setSelectedImages(selected);
     });
 
     ds.setSettings({
@@ -53,34 +52,31 @@ export default function Gallery({ images, setSelectedImages }) {
     return () => {
       ds.unsubscribe('DS:end', null, endId);
     }
-  }, [ds, galleryRef, mySetSelectedImages]);
+  }, [ds, setSelectedImages]);
 
-  const slides = images.map((image) => ({src: image }));
+
 
   const imgItems = images.map((image, index) => {
     return <Image
       src={image}
-      key={image}
+      key={`image-${index}`}
       onclick={() => {
-        if (!isControlPressed) {
-          console.log('selecting index', index);
-          setIndex(index)
-        }
+        console.log('clicked index', index);
+        setIndex(index)
       }}
     />
   });
 
   return (
     <>
-      <div id='gallery' ref={galleryRef}>
+      <p>&nbsp;&nbsp;Images ({imgItems.length}) { selectedCount ? ( 
+        `(${selectedCount} selected)` 
+      ) : null }</p>
+      <hr />
+      <div className='gallery' ref={galleryRef}>
         {imgItems}
       </div>
-      <Lightbox
-        index={index}
-        open={(index >= 0)}
-        close={() => setIndex(-1)}
-        slides={slides}
-      />
     </>
+
   );
 }

@@ -3,22 +3,19 @@ import { useEffect, useRef, useState } from 'react';
 
 import Gallery from './Gallery.jsx';
 import SearchBox from './SearchBox.jsx';
+import MySwiper from './Swiper.jsx';
 import SelectedTagBox from './SelectedTagBox.jsx';
 import TagBox from './TagBox.jsx';
 
-import { DragSelectProvider } from './DragSelectContext';
+// import { DragSelectProvider } from './DragSelectContext';
 import { usePythonApi } from './usePythonApi';
-
-function getRealImagePath(image) {
-  const url = new URL(image);
-  return decodeURI(url.pathname).substring(1);
-}
 
 export default function App() {
   console.log('app render');
   const [allTags, setAllTags] = useState([]);
   const [excludedTags, setExcludedTags] = useState([]);
   const [includedTags, setIncludedTags] = useState([]);
+  const [index, setIndex] = useState(-1);
 
   const [selectedImages, setSelectedImages] = useState([]);
   const [tagsByImage, setTagsByImage] = useState({});  // NOTE: Do not use in effect deplist.
@@ -28,6 +25,35 @@ export default function App() {
 
   // pythonApi
   const pythonApi = usePythonApi();
+
+  const images = Object.keys(tagsByImage);
+
+  useEffect(() => {
+    console.log('app:useEffect: sync index to selectedImages');
+    if (index < 0) return;
+
+    setSelectedImages([images[index]]);
+  }, [images, index]);
+
+  // Escape key
+  useEffect(() => {
+    console.log('app:useEffect: add escape handler')
+
+    const handler = ({ key }) => {
+      if (key == 'Escape') {
+        console.log('escape pressed');
+        setIndex(-1);
+      }
+    };
+
+    window.addEventListener('keydown', handler);
+
+    return () => {
+      window.removeEventListener('keydown', handler);
+    }
+  }, []);
+
+    
 
   // get all tags
   useEffect(() => {
@@ -90,16 +116,12 @@ export default function App() {
     console.log(`EDIT MODE:removeTagFromImages tag:${tagText} images:`, selectedImages);
     if (!pythonApi) return;
 
-    const selectedImagePaths = selectedImages.map((image) => {
-      return getRealImagePath(image.src);
-    });
-
-    pythonApi.remove_tag_from_images(tagText, selectedImagePaths).then((count) => {
+    pythonApi.remove_tag_from_images(tagText, selectedImages).then((count) => {
       console.log('we removed ', count, ' tags from db, removing from state.');
       if (!count) return;
 
       const copy = { ...tagsByImage };
-      for (const image of selectedImagePaths) {
+      for (const image of selectedImages) {
         const tags = copy[image];
         console.log('tags on', image, ': ', tags);
         tags.splice(tags.indexOf(tagText), 1);
@@ -114,16 +136,12 @@ export default function App() {
     console.log(`EDIT MODE:addTagToImages tag:${tagText} images:`, selectedImages);
     if (!pythonApi) return;
 
-    const selectedImagePaths = selectedImages.map((image) => {
-      return getRealImagePath(image.src);
-    });
-
-    pythonApi.add_tag_to_images(tagText, selectedImagePaths).then((count) => {
+    pythonApi.add_tag_to_images(tagText, selectedImages).then((count) => {
       console.log('we added', count, ' imagetags to db, updating state.');
       if (!count) return;
 
       const copy = { ...tagsByImage };
-      for (const image of selectedImagePaths) {
+      for (const image of selectedImages) {
         const tags = copy[image];
         console.log('tags on', image, ': ', tags);
         copy[image] = [...tags, tagText];
@@ -155,19 +173,17 @@ export default function App() {
   }
   console.log(`app.render: there are ${visibleTags.size} tags visible on ${imgCount} images`);
 
-  const images = Object.keys(tagsByImage);
 
   const selectedTags = [];
   if (selectedImages && tagsByImage) {
     for (const image of selectedImages) {
-      const realImage = getRealImagePath(image.src);
-      console.log('checking for tags on', realImage);
-      if (!(realImage in tagsByImage)) {
-        console.log('no tags sorry', realImage);
+      console.log('checking for tags on', image);
+      if (!(image in tagsByImage)) {
+        console.log('no tags sorry', image);
         continue;
       }
-      console.log('found tags', tagsByImage[realImage]);
-      for (const tag of tagsByImage[realImage]) {
+      console.log('found tags', tagsByImage[image]);
+      for (const tag of tagsByImage[image]) {
         if (!selectedTags.includes(tag)) {
           selectedTags.push(tag);
         }
@@ -220,17 +236,40 @@ export default function App() {
               removeTagHandler={addExcludedTag}
             />
           </div>
+          { images.length ? null : (
+          <div className='tagbox'>
+            <TagBox
+              id='all-tags'
+              title='All tags'
+              tags={allTags}
+              addTagHandler={addIncludedTag}
+              removeTagHandler={addExcludedTag}
+            />
+          </div>
+          )}
       </div>
-      <DragSelectProvider settings={{ draggability: false }}>
-        <p>&nbsp;&nbsp;Images ({images.length}) { selectedImages.length ? ( 
-          `(${selectedImages.length} selected)` 
-        ) : null }</p>
-        <hr />
+      { index >= 0 ?
+        <MySwiper 
+          images={images}
+          initialSlide={index}
+          setIndex={setIndex}
+        /> : (
         <Gallery
           images={images}
+          selectedCount={selectedImages.length}
+          setIndex={setIndex}
           setSelectedImages={setSelectedImages}
         />
-      </DragSelectProvider>
+        )}
     </>
   );
 }
+
+//      <DragSelectProvider settings={{ draggability: false }}>
+//      </DragSelectProvider>
+/*
+      { index >= 0 ?
+        <MySwiper 
+          images={images}
+        /> : (
+        */
