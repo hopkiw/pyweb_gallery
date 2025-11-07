@@ -8,22 +8,23 @@ export default function SearchBox({ tagBoxId, title, allTags, tags, setTags, inp
   console.log('searchbox render');
   const [value, setValue] = useState(null);
 
-  const handleOnChange = (newTag) => {
+  const handleOnChange = ({ value: newTag }) => {
     console.log('searchbox: get new tag:', newTag);
     if (!newTag) return;
-    if (!tags.includes(newTag.value)) {
+    if (!tags.includes(newTag)) {
+      console.log('searchbox: ADD new tag:', newTag);
       setTags([
         ...tags,
-        newTag.value
+        newTag
       ])
     }
     setValue(null);
   }
 
   // callback
-  const removeTag = (val) => {
-    console.log('searchbox: removeTag:', val.tagText);
-    const newTags = tags.filter(t => t !== val.tagText);
+  const removeTag = ({ tagText }) => {
+    console.log('searchbox: removeTag:', tagText);
+    const newTags = tags.filter(t => t !== tagText);
     console.log('searchbox: setting tags to:', newTags);
     setTags(newTags);
   }
@@ -32,7 +33,7 @@ export default function SearchBox({ tagBoxId, title, allTags, tags, setTags, inp
     return { 'value': t, 'label': t }
   });
 
-  console.log('searchbox.render:', options);
+  console.log('searchbox.render options:', options);
 
   return (
     <>

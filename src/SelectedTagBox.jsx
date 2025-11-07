@@ -25,11 +25,11 @@ export default function SelectedTagBox({
   const [addTagValue, setAddTagValue] = useState(false);
 
   // callback
-  const handleChange = (e) => {
-    if (!e || !e.value) return;
+  const handleChange = ({ value: tagText }) => {
+    if (tagText) return;
 
-    console.log('SelectedTagBox.handleChange:', e.value);
-    changeHandler({ tagText: e.value });
+    console.log('SelectedTagBox.handleChange:', tagText);
+    changeHandler({ tagText });
     setAddTagValue('');
   };
 
