@@ -7,7 +7,6 @@ import MySwiper from './Swiper.jsx';
 import SelectedTagBox from './SelectedTagBox.jsx';
 import TagBox from './TagBox.jsx';
 
-// import { DragSelectProvider } from './DragSelectContext';
 import { usePythonApi } from './usePythonApi';
 
 export default function App() {
@@ -29,8 +28,9 @@ export default function App() {
 
   const images = Object.keys(tagsByImage);
 
-  // TODO: fix flashing on return to gallery -- due to the sizing trick?
   // TODO: remember position in gallery (or scroll to index)
+  // TODO: cache images and/or image dimensions
+  // TODO: further develop custom components for gallery so we can add class to selected
 
   // Escape key
   useEffect(() => {
@@ -272,6 +272,7 @@ export default function App() {
       }
       <Gallery
         images={images}
+        selectedImages={selectedImages}
         setIndex={setIndexAndSelected}
         setSelectedImages={setSelectedImages}
         hidden={index >= 0}

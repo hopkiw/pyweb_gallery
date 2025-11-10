@@ -1,6 +1,8 @@
 import React from 'react';
 import { useEffect, useRef, useState } from 'react';
 
+import { useKeyListener } from './useKeyListener.js';
+
 import { RowsPhotoAlbum } from "react-photo-album";
 import "react-photo-album/rows.css";
 
@@ -29,11 +31,18 @@ function getAllImages(images) {
   return Promise.all(promises);
 }
 
-export default function Gallery({ hidden, images, setIndex }) {
-  console.log('gallery render');
+function getRealImagePath(image) {
+  const url = new URL(image);
+  return decodeURI(url.pathname).substring(1);
+}
+
+export default function Gallery({ hidden, images, selectedImages, setIndex, setSelectedImages }) {
+  console.log('gallery render, selectedImages:', selectedImages);
   const [photos, setPhotos] = useState([]);
   const galleryRef = useRef(null);
+  const lastClicked = useRef({ 'index': -1 });
 
+  const keyStore = useKeyListener();
 
   useEffect(() => {
     getAllImages(images).then((i) => {
@@ -42,17 +51,52 @@ export default function Gallery({ hidden, images, setIndex }) {
     });
   }, [images]);
 
+  useEffect(() => {
+    const imageElements = document.getElementsByClassName('gallery-item');
+    console.log('checking for selectedImages:', selectedImages);
+    for (const imgEl of imageElements) {
+      const realPath = getRealImagePath(imgEl.src);
+      console.log('checking if image is selected:', realPath);
+      if (selectedImages.includes(realPath)) {
+        console.log('add tag to', imgEl);
+        imgEl.classList.add('selected-image');
+      } else {
+        console.log('this image not selected');
+        imgEl.classList.remove('selected-image');
+      }
+    }
+  }, [selectedImages]);
+
+  // callback
+  const onClick = ({ index }) => {
+    var newSelected = [];
+
+    if (keyStore.shift && lastClicked.index >= 0) {
+      console.log(`selected from ${lastClicked.index} to ${index}`);
+      newSelected = images.slice(lastClicked.index, index + 1);
+    } else {
+      newSelected = [images[index]];
+    }
+
+    setSelectedImages(newSelected);
+    lastClicked.index = index;
+  };
+
   return (
     <>
       <div className='gallery' ref={galleryRef} hidden={hidden} >
         <RowsPhotoAlbum 
           photos={photos} 
-          onClick={({ index }) => {
-            setIndex(index);
+          onClick={onClick}
+          render={{
+            image: (props, context) => <img
+              {...props}
+              onDoubleClick={() => setIndex(context.index)}
+              className={`gallery-item ${props.className}`}
+            />,
           }}
         />
       </div>
     </>
-
   );
 }

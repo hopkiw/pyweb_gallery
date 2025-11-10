@@ -59,3 +59,9 @@ div + div { margin-top: 10px; }
 .deleteme {
   color: red;
 }
+
+.selected-image {
+  color: red;
+  outline-offset: 3px;
+  outline: 3px solid red;
+}
