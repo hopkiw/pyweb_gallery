@@ -8,6 +8,7 @@ async function getImageDimensions(src) {
   return new Promise(resolve => {
     const img = new Image();
     img.src = src;
+    img.hidden = true;
     img.onload = () => {
       img.remove();
       resolve({ width: img.naturalWidth, height: img.naturalHeight });
@@ -28,7 +29,7 @@ function getAllImages(images) {
   return Promise.all(promises);
 }
 
-export default function Gallery({ images, selectedCount, setIndex }) {
+export default function Gallery({ images, setIndex }) {
   console.log('gallery render');
   const [photos, setPhotos] = useState([]);
   const galleryRef = useRef(null);
@@ -43,10 +44,6 @@ export default function Gallery({ images, selectedCount, setIndex }) {
 
   return (
     <>
-      <p>&nbsp;&nbsp;Images ({images.length}) { selectedCount ? ( 
-        `(${selectedCount} selected)` 
-      ) : null }</p>
-      <hr />
       <div className='gallery' ref={galleryRef}>
         <RowsPhotoAlbum 
           photos={photos} 

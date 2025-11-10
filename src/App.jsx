@@ -15,10 +15,11 @@ export default function App() {
   const [excludedTags, setExcludedTags] = useState([]);
   const [includedTags, setIncludedTags] = useState([]);
   const [index, setIndex] = useState(-1);
-  console.log('app render, index is', index);
 
   const [selectedImages, setSelectedImages] = useState([]);
   const [tagsByImage, setTagsByImage] = useState({});  // NOTE: Do not use in effect deplist.
+
+  console.log('app render, index is', index, 'there are ', selectedImages.length, ' images selected:', selectedImages);
 
   const includeInputRef = useRef(null);
   const excludeInputRef = useRef(null);
@@ -28,14 +29,8 @@ export default function App() {
 
   const images = Object.keys(tagsByImage);
 
-  /*
-  useEffect(() => {
-    console.log('app:useEffect: sync index to selectedImages');
-    if (index < 0) return;
-
-    setSelectedImages([images[index]]);
-  }, [images, index]);
-  */
+  // TODO: fix flashing on return to gallery
+  // TODO: remember position in gallery (or scroll to index)
 
   // Escape key
   useEffect(() => {
@@ -45,6 +40,7 @@ export default function App() {
       if (key == 'Escape') {
         console.log('escape pressed');
         setIndex(-1);
+        setSelectedImages([]);
       }
     };
 
@@ -167,7 +163,8 @@ export default function App() {
   const setIndexAndSelected = (index_) => {
     console.log('combine callback');
     setIndex(index_);
-    setSelectedImages([images[index_]]);
+    if (index_ >= 0)
+      setSelectedImages([images[index_]]);
   }
 
   const visibleTags = new Set();
@@ -261,22 +258,18 @@ export default function App() {
           initialSlide={index}
           setIndex={setIndexAndSelected}
         /> : (
-        <Gallery
-          images={images}
-          selectedCount={selectedImages.length}
-          setIndex={setIndex}
-          setSelectedImages={setSelectedImages}
-        />
+          <>
+            <p>&nbsp;&nbsp;Images ({images.length}) { selectedImages.length ? ( 
+              `(${selectedImages.length} selected)` 
+            ) : null }</p>
+            <hr />
+            <Gallery
+              images={images}
+              setIndex={setIndex}
+              setSelectedImages={setSelectedImages}
+            />
+          </>
         )}
     </>
   );
 }
-
-//      <DragSelectProvider settings={{ draggability: false }}>
-//      </DragSelectProvider>
-/*
-      { index >= 0 ?
-        <MySwiper 
-          images={images}
-        /> : (
-        */
