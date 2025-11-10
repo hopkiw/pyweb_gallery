@@ -11,11 +11,11 @@ import TagBox from './TagBox.jsx';
 import { usePythonApi } from './usePythonApi';
 
 export default function App() {
-  console.log('app render');
   const [allTags, setAllTags] = useState([]);
   const [excludedTags, setExcludedTags] = useState([]);
   const [includedTags, setIncludedTags] = useState([]);
   const [index, setIndex] = useState(-1);
+  console.log('app render, index is', index);
 
   const [selectedImages, setSelectedImages] = useState([]);
   const [tagsByImage, setTagsByImage] = useState({});  // NOTE: Do not use in effect deplist.
@@ -28,12 +28,14 @@ export default function App() {
 
   const images = Object.keys(tagsByImage);
 
+  /*
   useEffect(() => {
     console.log('app:useEffect: sync index to selectedImages');
     if (index < 0) return;
 
     setSelectedImages([images[index]]);
   }, [images, index]);
+  */
 
   // Escape key
   useEffect(() => {
@@ -52,8 +54,6 @@ export default function App() {
       window.removeEventListener('keydown', handler);
     }
   }, []);
-
-    
 
   // get all tags
   useEffect(() => {
@@ -163,6 +163,13 @@ export default function App() {
     });
   }
 
+  // callback
+  const setIndexAndSelected = (index_) => {
+    console.log('combine callback');
+    setIndex(index_);
+    setSelectedImages([images[index_]]);
+  }
+
   const visibleTags = new Set();
   let imgCount = 0;
   for (const v of Object.values(tagsByImage)) {
@@ -252,7 +259,7 @@ export default function App() {
         <MySwiper 
           images={images}
           initialSlide={index}
-          setIndex={setIndex}
+          setIndex={setIndexAndSelected}
         /> : (
         <Gallery
           images={images}

@@ -11,10 +11,9 @@ import { EffectFade, Navigation, Keyboard } from 'swiper/modules';
 
 export default function MySwiper({ images, initialSlide, setIndex }) {
   console.log('MySwiper render');
-  const slides = images.map((src) => { 
+  const slides = images.map((src) => {
     return <SwiperSlide><img src={src}/></SwiperSlide>;
   });
-  console.log('returning lightbox with slides', slides);
 
   return (
     <>
@@ -28,7 +27,14 @@ export default function MySwiper({ images, initialSlide, setIndex }) {
           keyboard={{ enabled: true }}
           modules={[EffectFade, Navigation, Keyboard]}
           className="mySwiper"
-          onActiveIndexChange={({ activeIndex }) => setIndex(activeIndex)}
+          onActiveIndexChange={({ activeIndex }) => {
+            console.log(`swiper: setIndex(${activeIndex}`);
+            setIndex(activeIndex);
+          }}
+          onDestroy={() => {
+            console.log('swiper destroy: reset index -1');
+            setIndex(-1);
+          }}
         > {slides} </Swiper>
       </div>
     </>
