@@ -29,7 +29,7 @@ export default function App() {
 
   const images = Object.keys(tagsByImage);
 
-  // TODO: fix flashing on return to gallery
+  // TODO: fix flashing on return to gallery -- due to the sizing trick?
   // TODO: remember position in gallery (or scroll to index)
 
   // Escape key
@@ -161,10 +161,15 @@ export default function App() {
 
   // callback
   const setIndexAndSelected = (index_) => {
-    console.log('combine callback');
-    setIndex(index_);
-    if (index_ >= 0)
+    console.log('combine callback, set index to', index_);
+    // TODO: aren't effects supposed to handle this 'if changed' logic
+    if (index_ >= 0 && index_ != index) {
+      console.log('callback: setting index to', index_);
+      setIndex(index_);
       setSelectedImages([images[index_]]);
+    } else {
+      console.log('callback: not changing');
+    }
   }
 
   const visibleTags = new Set();
@@ -252,24 +257,25 @@ export default function App() {
           </div>
           )}
       </div>
+      <p>
+        &nbsp;&nbsp;Images ({images.length}) { selectedImages.length && index < 0 ? ( 
+          `(${selectedImages.length} selected)` 
+        ) : null }
+      </p>
+      <hr />
       { index >= 0 ?
         <MySwiper 
           images={images}
           initialSlide={index}
           setIndex={setIndexAndSelected}
-        /> : (
-          <>
-            <p>&nbsp;&nbsp;Images ({images.length}) { selectedImages.length ? ( 
-              `(${selectedImages.length} selected)` 
-            ) : null }</p>
-            <hr />
-            <Gallery
-              images={images}
-              setIndex={setIndex}
-              setSelectedImages={setSelectedImages}
-            />
-          </>
-        )}
+        /> : null 
+      }
+      <Gallery
+        images={images}
+        setIndex={setIndexAndSelected}
+        setSelectedImages={setSelectedImages}
+        hidden={index >= 0}
+      />
     </>
   );
 }

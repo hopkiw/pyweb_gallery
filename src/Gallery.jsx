@@ -29,22 +29,22 @@ function getAllImages(images) {
   return Promise.all(promises);
 }
 
-export default function Gallery({ images, setIndex }) {
+export default function Gallery({ hidden, images, setIndex }) {
   console.log('gallery render');
   const [photos, setPhotos] = useState([]);
   const galleryRef = useRef(null);
 
-  console.log('gallery render: got photos:', photos);
 
   useEffect(() => {
     getAllImages(images).then((i) => {
+      console.log('gallery render: got photos:', i);
       setPhotos(i);
     });
   }, [images]);
 
   return (
     <>
-      <div className='gallery' ref={galleryRef}>
+      <div className='gallery' ref={galleryRef} hidden={hidden} >
         <RowsPhotoAlbum 
           photos={photos} 
           onClick={({ index }) => {
