@@ -13,6 +13,10 @@ function getSnapshot() {
 
 function subscribe(callback) {
   const handler = () => {
+    if (!window.pywebview) {
+      return;
+    }
+
     if (store.pythonApi != window.pywebview.api) {
       store.pythonApi = window.pywebview.api;
       callback();

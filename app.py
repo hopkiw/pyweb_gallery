@@ -39,10 +39,10 @@ class Api:
 def main():
     dev = '--dev' in sys.argv
     window = webview.create_window('pywebview-react boilerplate', 'http://localhost:5173' if dev else 'dist/index.html', js_api=Api())
-    webview.settings['ALLOW_DOWNLOADS'] = True
-    webview.settings['REMOTE_DEBUGGING_PORT'] = 9222
+    webview.settings['ALLOW_DOWNLOADS'] = dev
+    webview.settings['REMOTE_DEBUGGING_PORT'] = 9222 if dev else None
     webview.settings['OPEN_DEVTOOLS_IN_DEBUG'] = False
-    webview.start(debug=dev, gui='qt')
+    webview.start(debug=dev, gui='qt', private_mode=False)
 
     return window
 
