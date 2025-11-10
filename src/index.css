@@ -1,6 +1,4 @@
 .gallery {
-  display: flex;
-  flex-wrap: wrap;
   gap: 1em;
   margin-right: 25%;
 }
@@ -14,6 +12,8 @@
   margin-left: auto;
   margin-right: auto;
   object-fit: contain;
+  max-height: 90vh;
+  overflow: clip;
 }
 
 .item {
