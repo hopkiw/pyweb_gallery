@@ -11,8 +11,17 @@ import { usePythonApi } from './usePythonApi';
 
 export default function App() {
   const [allTags, setAllTags] = useState([]);
-  const [excludedTags, setExcludedTags] = useState([]);
-  const [includedTags, setIncludedTags] = useState([]);
+  const [excludedTags, setExcludedTags] = useState(() => {
+    // getting stored value
+    const saved = localStorage.getItem('excluded_tags');
+    const initialValue = JSON.parse(saved);
+    return initialValue || [];
+  });
+  const [includedTags, setIncludedTags] = useState(() => {
+    const saved = localStorage.getItem('included_tags');
+    const initialValue = JSON.parse(saved);
+    return initialValue || [];
+  });
   const [index, setIndex] = useState(-1);
 
   const [selectedImages, setSelectedImages] = useState([]);
@@ -31,6 +40,18 @@ export default function App() {
 
   // TODO: remember position in gallery (or scroll to index)
   // TODO: cache images and/or image dimensions
+
+  useEffect(() => {
+    console.log('sync with local storage');
+
+    localStorage.setItem('excluded_tags', JSON.stringify(excludedTags));
+  }, [excludedTags]);
+
+  useEffect(() => {
+    console.log('sync with local storage');
+
+    localStorage.setItem('included_tags', JSON.stringify(includedTags));
+  }, [includedTags]);
 
   // Escape key
   useEffect(() => {
