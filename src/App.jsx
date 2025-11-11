@@ -18,7 +18,8 @@ export default function App() {
   const [selectedImages, setSelectedImages] = useState([]);
   const [tagsByImage, setTagsByImage] = useState({});  // NOTE: Do not use in effect deplist.
 
-  console.log('app render, index is', index, 'there are ', selectedImages.length, ' images selected:', selectedImages);
+  console.log('app render, index is', index, 'there are ', selectedImages.length, ' images selected:', 
+    selectedImages);
 
   const includeInputRef = useRef(null);
   const excludeInputRef = useRef(null);
@@ -30,7 +31,6 @@ export default function App() {
 
   // TODO: remember position in gallery (or scroll to index)
   // TODO: cache images and/or image dimensions
-  // TODO: further develop custom components for gallery so we can add class to selected
 
   // Escape key
   useEffect(() => {
@@ -258,9 +258,8 @@ export default function App() {
           )}
       </div>
       <p>
-        &nbsp;&nbsp;Images ({images.length}) { selectedImages.length && index < 0 ? ( 
-          `(${selectedImages.length} selected)` 
-        ) : null }
+        &nbsp;&nbsp;Images ({images.length})
+        { selectedImages.length && index < 0 ? ( `(${selectedImages.length} selected)` ) : null }
       </p>
       <hr />
       { index >= 0 ?

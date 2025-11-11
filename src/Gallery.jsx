@@ -74,6 +74,8 @@ export default function Gallery({ hidden, images, selectedImages, setIndex, setS
     if (keyStore.shift && lastClicked.index >= 0) {
       console.log(`selected from ${lastClicked.index} to ${index}`);
       newSelected = images.slice(lastClicked.index, index + 1);
+    } else if (keyStore.control) {
+      newSelected = [...selectedImages, images[index]];
     } else {
       newSelected = [images[index]];
     }
