@@ -52,7 +52,7 @@ export default function Gallery({ hidden, images, selectedImages, setIndex, setS
       if (key == 'a' && keyStore.control) {
         console.log('a key pressed');
         setSelectedImages([...images]);
-      }
+      } 
     };
 
     window.addEventListener('keydown', handler);

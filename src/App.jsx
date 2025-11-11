@@ -41,12 +41,14 @@ export default function App() {
   // TODO: remember position in gallery (or scroll to index)
   // TODO: cache images and/or image dimensions
 
+  // sync to storage
   useEffect(() => {
     console.log('sync with local storage');
 
     localStorage.setItem('excluded_tags', JSON.stringify(excludedTags));
   }, [excludedTags]);
 
+  // sync to storage
   useEffect(() => {
     console.log('sync with local storage');
 
@@ -223,7 +225,7 @@ export default function App() {
 
   return (
     <>
-      <div className='w3-sidebar w3-bar-block searchbar'>
+      <div className='searchbar'>
         <div className='tagbox'>
           <SearchBox
             tagBoxId='include-tags'
