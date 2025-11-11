@@ -44,6 +44,25 @@ export default function Gallery({ hidden, images, selectedImages, setIndex, setS
 
   const keyStore = useKeyListener();
 
+  // key bindings
+  useEffect(() => {
+    console.log('app:useEffect: add escape handler')
+
+    const handler = ({ key }) => {
+      if (key == 'a' && keyStore.control) {
+        console.log('a key pressed');
+        setSelectedImages([...images]);
+      }
+    };
+
+    window.addEventListener('keydown', handler);
+
+    return () => {
+      window.removeEventListener('keydown', handler);
+    }
+  }, [images, keyStore.control, setSelectedImages]);
+
+  // generate photo state from images ??
   useEffect(() => {
     getAllImages(images).then((i) => {
       console.log('gallery render: got photos:', i);
@@ -51,6 +70,7 @@ export default function Gallery({ hidden, images, selectedImages, setIndex, setS
     });
   }, [images]);
 
+  // apply class to selected items
   useEffect(() => {
     const imageElements = document.getElementsByClassName('gallery-item');
     console.log('checking for selectedImages:', selectedImages);
