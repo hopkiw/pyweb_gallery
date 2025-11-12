@@ -7,12 +7,13 @@ import MySwiper from './Swiper.jsx';
 import SelectedTagBox from './SelectedTagBox.jsx';
 import TagBox from './TagBox.jsx';
 
-import { usePythonApi } from './usePythonApi';
+import { KeyStoreProvider } from './KeyStoreProvider.jsx';
+import { usePythonApi } from './usePythonApi.js';
+
 
 export default function App() {
   const [allTags, setAllTags] = useState([]);
   const [excludedTags, setExcludedTags] = useState(() => {
-    // getting stored value
     const saved = localStorage.getItem('excluded_tags');
     const initialValue = JSON.parse(saved);
     return initialValue || [];
@@ -40,6 +41,7 @@ export default function App() {
 
   // TODO: remember position in gallery (or scroll to index)
   // TODO: cache images and/or image dimensions
+  // TODO: show tag count with tags
 
   // sync to storage
   useEffect(() => {
@@ -224,7 +226,7 @@ export default function App() {
   }
 
   return (
-    <>
+    <KeyStoreProvider>
       <div className='searchbar'>
         <div className='tagbox'>
           <SearchBox
@@ -299,6 +301,6 @@ export default function App() {
         setSelectedImages={setSelectedImages}
         hidden={index >= 0}
       />
-    </>
+    </KeyStoreProvider>
   );
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useEffect, useEffectEvent, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 
 import CreatableSelect from 'react-select/creatable';
 
@@ -7,9 +7,6 @@ import Tag from './Tag.jsx';
 import SvgIconEdit from './icons/SvgIconEdit.jsx';
 import SvgIconEditOutline from './icons/SvgIconEditOutline.jsx';
 import SvgIconPencilAdd from './icons/SvgIconPencilAdd.jsx';
-
-import { useKeyListener } from './useKeyListener.js';
-
 
 export default function SelectedTagBox({ 
   id,
@@ -27,55 +24,6 @@ export default function SelectedTagBox({
   const [addTagValue, setAddTagValue] = useState(false);
   const addTagRef = useRef(null);
 
-  // const keyStore = useKeyListener();
-  const keyStore = useRef({ control: false, shift: false });
-
-  useEffect(() => {
-    const handleKeyDown = ({ key }) => {
-      if (key === 'Control' && keyStore.current.control !== true) {
-        keyStore.current.control = true;
-      }
-      if (key === 'Shift' && keyStore.current.shift !== true) {
-        keyStore.current.shift = true;
-      }
-      if (key == 't' && keyStore.current.control && tags.length) {
-        console.log('control-t');
-        setAdding(true);
-      }
-    }
-
-    const handleKeyUp = (e) => {
-      if (e.key === 'Control' && keyStore.current.control !== false) {
-        keyStore.current.control = false;
-      }
-      if (e.key === 'Shift' && keyStore.current.shift !== false) {
-        keyStore.current.shift = false;
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
-    }
-  }, []);
-
-  useEffect(() => {
-    const handleOnLoad = () => {
-      if (adding) {
-        const el = addTagRef.current;
-        if (el) el.focus();
-      }
-    };
-
-    window.addEventListener('onload', handleOnLoad);
-    return () => {
-      window.removeEventListener('onload', handleOnLoad);
-    }
-  }, [adding]);
-
   // callback
   const handleChange = ({ value: tagText }) => {
     if (!tagText) return;
@@ -83,6 +31,16 @@ export default function SelectedTagBox({
     // console.log('SelectedTagBox.handleChange:', tagText);
     changeHandler({ tagText });
     setAddTagValue('');
+    setAdding(false);
+  };
+
+  const handleKeyDown = ({ key, ...e }) => {
+    console.log('keydown!', key);
+    if (key == 'Escape') {
+      setAdding(false);
+      setEditing(false);
+      e.preventDefault(); // is this even doing anything?
+    }
   };
 
   const tagItems = tags.map((tag) =>
@@ -112,8 +70,10 @@ export default function SelectedTagBox({
       {tagItems}
       { adding ? (
         <CreatableSelect
+          autoFocus={true}
           isClearable
           onChange={handleChange}
+          onKeyDown={handleKeyDown}
           onCreateOption={(tagText) => createTag({ tagText })}
           options={allTags.map(t => ({ label: t, value: t }))}
           value={addTagValue}
@@ -125,3 +85,5 @@ export default function SelectedTagBox({
   );
 }
 
+
+// TODO: onCreateOption is not needed if we use getNewOptionData appropriately?

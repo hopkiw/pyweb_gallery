@@ -1,16 +1,17 @@
 import React from 'react';
 import { useCallback, useEffect, useEffectEvent, useRef, useState } from 'react';
 
-// import { useKeyListener } from './useKeyListener.js';
-
 import { RowsPhotoAlbum } from "react-photo-album";
 import "react-photo-album/rows.css";
+
+import { useKeyStore } from './KeyStoreProvider.jsx';
 
 async function getImageDimensions(src) {
   return new Promise(resolve => {
     const img = new Image();
     img.src = src;
     img.hidden = true;
+    img.className = 'liam';
     img.onload = () => {
       img.remove();
       resolve({ width: img.naturalWidth, height: img.naturalHeight });
@@ -21,11 +22,13 @@ async function getImageDimensions(src) {
 
 function getAllImages(images) {
   const promises = images.map(async (image , index) => {
-    const dimensions = await getImageDimensions(image);
+    // const dimensions = await getImageDimensions(image);
     return {
         src: image,
         key: `gallery-item-${index}`,
-        ...dimensions,
+        width: 500,
+        height: 500
+        // ...dimensions,
     };
   });
   return Promise.all(promises);
@@ -37,45 +40,12 @@ function getRealImagePath(image) {
 }
 
 export default function Gallery({ hidden, images, selectedImages, setIndex, setSelectedImages }) {
-  console.log('gallery render');
   const [photos, setPhotos] = useState([]);
   const galleryRef = useRef(null);
   const lastClicked = useRef({ index: -1 });
 
-  // const keyStore = useKeyListener();
-  const keyStore = useRef({ control: false, shift: false });
-
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'Control' && keyStore.current.control !== true) {
-        // keyStore.current = {...keyStore.keys, 'control': true};
-        keyStore.current.control = true;
-      }
-      if (e.key === 'Shift' && keyStore.current.shift !== true) {
-        // keyStore.keys = {...keyStore.keys, 'shift': true};
-        keyStore.current.shift = true;
-      }
-    }
-
-    const handleKeyUp = (e) => {
-      if (e.key === 'Control' && keyStore.current.control !== false) {
-        // keyStore.keys = {...keyStore.keys, 'control': false};
-        keyStore.current.control = false;
-      }
-      if (e.key === 'Shift' && keyStore.current.shift !== false) {
-        // keyStore.keys = {...keyStore.keys, 'shift': false};
-        keyStore.current.shift = false;
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
-    }
-  }, []);
+  const keyStore = useKeyStore();
+  console.log('gallery render, keyStore:', keyStore);
 
   const mySetSelectedImages = useEffectEvent((images) => {
     setSelectedImages(images);
@@ -83,10 +53,10 @@ export default function Gallery({ hidden, images, selectedImages, setIndex, setS
 
   // key bindings
   useEffect(() => {
-    console.log('gallery:useEffect: add keybind handler')
+    console.log('gallery:useEffect: add keybind handler', keyStore)
 
     const handler = ({ key }) => {
-      if (key == 'a' && keyStore.current.control) {
+      if (key == 'a' && keyStore.keys.control) {
         console.log('ctrl-a pressed');
         mySetSelectedImages([...images]);
       }
@@ -97,7 +67,7 @@ export default function Gallery({ hidden, images, selectedImages, setIndex, setS
     return () => {
       window.removeEventListener('keydown', handler);
     }
-  }, [images, mySetSelectedImages]);
+  }, [images, keyStore, mySetSelectedImages]);
 
   // generate photo state from images - maybe redundant
   useEffect(() => {
@@ -121,12 +91,13 @@ export default function Gallery({ hidden, images, selectedImages, setIndex, setS
   }, [selectedImages]);
 
   const onClick = useCallback(({ index }) => {
+    console.log(`clicked ${index}; control:${keyStore.keys.control} shift:${keyStore.keys.shift}`);
     var newSelected = [];
 
-    if (keyStore.current.shift && lastClicked.index >= 0) {
+    if (keyStore.keys.shift && lastClicked.index >= 0) {
       const [small, big] = index > lastClicked.index ? [lastClicked.index, index] : [index, lastClicked.index];
       newSelected = images.slice(small, big + 1);
-    } else if (keyStore.current.control) {
+    } else if (keyStore.keys.control) {
       newSelected = [...selectedImages, images[index]];
       lastClicked.index = index;
     } else {
