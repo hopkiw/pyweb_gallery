@@ -42,11 +42,12 @@ function getRealImagePath(image) {
 export default function Gallery({ hidden, images, selectedImages, setIndex, setSelectedImages }) {
   const [photos, setPhotos] = useState([]);
   const galleryRef = useRef(null);
-  const lastClicked = useRef({ index: -1 });
+  const lastSelected = useRef(-1);
 
   const keyStore = useKeyStore();
   console.log('gallery render, keyStore:', keyStore);
 
+  // TODO: is this needed?
   const mySetSelectedImages = useEffectEvent((images) => {
     setSelectedImages(images);
   }, []);
@@ -60,6 +61,30 @@ export default function Gallery({ hidden, images, selectedImages, setIndex, setS
         console.log('ctrl-a pressed');
         mySetSelectedImages([...images]);
       }
+      if (key == 'ArrowRight') {
+        console.log('right-arrow pressed');
+        lastSelected.current = lastSelected.current + 1;
+        if (keyStore.keys.shift) {
+          mySetSelectedImages((prevstate) => {
+            return [...prevstate, images[lastSelected.current]];
+          });
+        } else {
+          console.log('without shift, setting selected images:', images[lastSelected.current]);
+          mySetSelectedImages([images[lastSelected.current]]);
+        }
+      }
+      if (key == 'ArrowLeft') {
+        console.log('left-arrow pressed');
+        lastSelected.current = lastSelected.current - 1;
+        if (keyStore.keys.shift) {
+          mySetSelectedImages((prevstate) => {
+            return [...prevstate, images[lastSelected.current]];
+          });
+        } else {
+          console.log('without shift, setting selected images:', images[lastSelected.current]);
+          mySetSelectedImages([images[lastSelected.current]]);
+        }
+      }
     };
 
     window.addEventListener('keydown', handler);
@@ -69,7 +94,7 @@ export default function Gallery({ hidden, images, selectedImages, setIndex, setS
     }
   }, [images, keyStore, mySetSelectedImages]);
 
-  // generate photo state from images - maybe redundant
+  // generate photo state from images - TODO: maybe redundant
   useEffect(() => {
     getAllImages(images).then((i) => {
       console.log('gallery render: got photos:', i);
@@ -77,7 +102,7 @@ export default function Gallery({ hidden, images, selectedImages, setIndex, setS
     });
   }, [images]);
 
-  // apply class to selected items - maybe move to onclick
+  // apply class to selected items - TODO: move to onclick
   useEffect(() => {
     const imageElements = document.getElementsByClassName('gallery-item');
     for (const imgEl of imageElements) {
@@ -94,15 +119,17 @@ export default function Gallery({ hidden, images, selectedImages, setIndex, setS
     console.log(`clicked ${index}; control:${keyStore.keys.control} shift:${keyStore.keys.shift}`);
     var newSelected = [];
 
-    if (keyStore.keys.shift && lastClicked.index >= 0) {
-      const [small, big] = index > lastClicked.index ? [lastClicked.index, index] : [index, lastClicked.index];
+    if (keyStore.keys.shift && lastSelected.current >= 0) {
+      console.log('shift-click selection');
+      const [small, big] = index > lastSelected.current ? [lastSelected.current, index] : [index, lastSelected.current];
       newSelected = images.slice(small, big + 1);
     } else if (keyStore.keys.control) {
+      console.log('control-click selection');
       newSelected = [...selectedImages, images[index]];
-      lastClicked.index = index;
+      lastSelected.current = index;
     } else {
       newSelected = [images[index]];
-      lastClicked.index = index;
+      lastSelected.current = index;
     }
 
     setSelectedImages(newSelected);
