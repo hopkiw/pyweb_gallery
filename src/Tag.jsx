@@ -6,6 +6,7 @@ export default function Tag({ tag, className, addTagHandler, removeTagHandler })
   if (!(tag)) {
     return null;
   }
+  // console.log('Tag<> render', tag);
 
   return (
     <span>
@@ -23,7 +24,7 @@ export default function Tag({ tag, className, addTagHandler, removeTagHandler })
         >[-]</a>
       ) : null}
 
-      <a ref={tagRef} className={className}>{tag}</a>
+      <a ref={tagRef} className={className}>{tag.tagText}</a><a>&nbsp;({tag.count})</a>
       <a>&nbsp;</a>
     </span>
   );

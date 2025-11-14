@@ -41,7 +41,12 @@ export default function App() {
 
   // TODO: remember position in gallery (or scroll to index)
   // TODO: cache images and/or image dimensions
-  // TODO: show tag count with tags
+  // TODO: escape shouldn't deselect images if we're adding
+  // TODO: apply classes directly on click
+  // TODO: tag editor pane
+  // TODO: consistent style in effects & handlers
+  // TODO: audit for unnecessary state , when setState((prevstate) => prevstate + 1) could be used
+  // TODO: always refresh state from DB
 
   // sync to storage
   useEffect(() => {
@@ -83,22 +88,28 @@ export default function App() {
 
     pythonApi.get_all_tags().then(tags => {
       if (tags) {
-        setAllTags(tags);
+        console.log('app:useEffect: got tags', tags);
+        const newAllTags = tags.map(([tagText, count]) => ({ tagText, count }));
+        console.log('app:useEffect: generated newalltags', newAllTags);
+        newAllTags.sort((a, b) => b.count - a.count);
+        setAllTags(newAllTags);
+      } else {
+        console.log('didnt get any tags????');
       }
     });
   }, [pythonApi, setAllTags]);
 
   // get images
   useEffect(() => {
-    console.log(`useEffect: get_images include_tags=${includedTags} excludedTags=${excludedTags}`);
     if (!pythonApi) return;
 
-    console.log('app:useEffect: get_images calling python api', includedTags, excludedTags);
-    pythonApi.get_images(includedTags, excludedTags).then((images) => {
-      console.log('app:useEffect: get_images promise resolved: got images:', images);
+    // const images = Object.keys(tagsByImage);
+    const includedTagTexts = includedTags.map((t) => t.tagText);
+    const excludedTagTexts = excludedTags.map((t) => t.tagText);
+    console.log(`useEffect: get_images include_tags=${includedTags} excludedTags=${excludedTags}`);
+
+    pythonApi.get_images(includedTagTexts, excludedTagTexts).then((images) => {
       pythonApi.get_tags(images).then((newtagsbyimage) => {
-        console.log('app:useEffect: get_tags_for_images, promise resolved: got tagsByImage:', 
-          newtagsbyimage);
         setTagsByImage(newtagsbyimage);
       });
     });
@@ -106,7 +117,6 @@ export default function App() {
 
   // focus input field
   useEffect(() => {
-    console.log('app:useEffect: focus input');
     const element = includeInputRef.current;
     if (!element) return;
     element.focus();
@@ -114,20 +124,23 @@ export default function App() {
 
   // callback
   const addIncludedTag = ({ tagText }) => {
-    if (!includedTags.includes(tagText)) {
+    console.log('include tag clicked:', tagText);
+    if (!includedTags.find((tag) => tag.tagText == tagText)) {
+      const count = allTags.find((tag) => tag.tagText == tagText).count;
       setIncludedTags([
         ...includedTags,
-        tagText
+        { tagText, count }
       ])
     }
   };
 
   // callback
   const addExcludedTag = ({ tagText }) => {
-    if (!excludedTags.includes(tagText)) {
+    if (!excludedTags.find((tag) => tag.tagText == tagText)) {
+      const count = allTags.find((tag) => tag.tagText == tagText).count;
       setExcludedTags([
         ...excludedTags,
-        tagText
+        { tagText, count }
       ])
     }
   };
@@ -144,7 +157,6 @@ export default function App() {
       const copy = { ...tagsByImage };
       for (const image of selectedImages) {
         const tags = copy[image];
-        console.log('tags on', image, ': ', tags);
         tags.splice(tags.indexOf(tagText), 1);
         copy[image] = tags;
       }
@@ -164,7 +176,6 @@ export default function App() {
       const copy = { ...tagsByImage };
       for (const image of selectedImages) {
         const tags = copy[image];
-        console.log('tags on', image, ': ', tags);
         copy[image] = [...tags, tagText];
       }
       setTagsByImage(copy);
@@ -180,7 +191,8 @@ export default function App() {
       console.log('we create', count, 'tags in db, adding to state.');
       if (!count) return;
 
-      setAllTags([...allTags, tagText]);
+
+      // setAllTags({...allTags, tagText});
     });
   }
 
@@ -197,12 +209,15 @@ export default function App() {
     }
   }
 
-  const visibleTags = new Set();
+  const visibleTags = [];
   let imgCount = 0;
   for (const v of Object.values(tagsByImage)) {
     imgCount += 1;
-    for (const tag of v) {
-      visibleTags.add(tag);
+    for (const tagText of v) {
+      if (!visibleTags.find((tag) => tag.tagText == tagText)) {
+        const count = allTags.find((tag) => tag.tagText == tagText).count;
+        visibleTags.push({ tagText, count });
+      }
     }
   }
   console.log(`app.render: there are ${visibleTags.size} tags visible on ${imgCount} images`);
@@ -217,9 +232,10 @@ export default function App() {
         continue;
       }
       console.log('found tags', tagsByImage[image]);
-      for (const tag of tagsByImage[image]) {
-        if (!selectedTags.includes(tag)) {
-          selectedTags.push(tag);
+      for (const tagText of tagsByImage[image]) {
+        if (!selectedTags.find((tag) => tag.tagText == tagText)) {
+          const count = allTags.find((tag) => tag.tagText == tagText).count;
+          selectedTags.push({tagText, count});
         }
       }
     }

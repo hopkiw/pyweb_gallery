@@ -19,6 +19,7 @@ export default function SelectedTagBox({
   removeTagHandler,
   removeEditableHandler 
 }) {
+  console.log('SelectedTagBox<> render, tags are:', tags);
   const [editing, setEditing] = useState(false);
   const [adding, setAdding] = useState(false);
   const [addTagValue, setAddTagValue] = useState(false);
@@ -48,10 +49,13 @@ export default function SelectedTagBox({
       tag={tag}
       addTagHandler={editing ? null : addTagHandler}
       removeTagHandler={editing ? removeEditableHandler : removeTagHandler}
-      key={tag}
+      key={tag.tagText}
       className={editing ? 'deleteme' : ''}
     />
   );
+
+  const options = allTags.map((t) => ({'value': t.tagText, 'label': `${t.tagText} (${t.count})`, count: t.count }));
+  console.log();
 
   return (
     <>
@@ -75,7 +79,7 @@ export default function SelectedTagBox({
           onChange={handleChange}
           onKeyDown={handleKeyDown}
           onCreateOption={(tagText) => createTag({ tagText })}
-          options={allTags.map(t => ({ label: t, value: t }))}
+          options={options}
           value={addTagValue}
           ref={addTagRef}
         />

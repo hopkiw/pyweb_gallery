@@ -4,12 +4,13 @@ import Tag from './Tag.jsx';
 
 
 export default function TagBox({ id, title, tags = [], addTagHandler, removeTagHandler }) {
-  const tagItems = tags.map((tag) =>
+  console.log('TagBox<> render, tags:', tags);
+  const tagItems = tags.map((tag, index) =>
     <Tag
       tag={tag}
       addTagHandler={addTagHandler}
       removeTagHandler={removeTagHandler}
-      key={tag}
+      key={`${tag.tagText}-${index}`}
     />
   );
 

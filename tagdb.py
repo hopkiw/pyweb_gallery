@@ -182,9 +182,15 @@ class TagDB:
 
     def get_all_tags(self):
         cur = self.con.cursor()
-        res = cur.execute('SELECT tag FROM tags')
+        sql = """
+              SELECT tag, count(tag_id)
+                FROM imagetags
+          INNER JOIN tags
+                  ON imagetags.tag_id = tags.id
+            GROUP BY tag"""
+        res = cur.execute(sql)
 
-        return [entry[0] for entry in res.fetchall()]
+        return res.fetchall()
 
     def get_images_all_tags(self, tags):
         cur = self.con.cursor()

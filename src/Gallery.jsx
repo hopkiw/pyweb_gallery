@@ -97,7 +97,6 @@ export default function Gallery({ hidden, images, selectedImages, setIndex, setS
   // generate photo state from images - TODO: maybe redundant
   useEffect(() => {
     getAllImages(images).then((i) => {
-      console.log('gallery render: got photos:', i);
       setPhotos(i);
     });
   }, [images]);
@@ -116,7 +115,6 @@ export default function Gallery({ hidden, images, selectedImages, setIndex, setS
   }, [selectedImages]);
 
   const onClick = useCallback(({ index }) => {
-    console.log(`clicked ${index}; control:${keyStore.keys.control} shift:${keyStore.keys.shift}`);
     var newSelected = [];
 
     if (keyStore.keys.shift && lastSelected.current >= 0) {
