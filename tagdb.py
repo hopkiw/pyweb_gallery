@@ -185,7 +185,7 @@ class TagDB:
         sql = """
               SELECT tag, count(tag_id)
                 FROM imagetags
-          INNER JOIN tags
+          RIGHT JOIN tags
                   ON imagetags.tag_id = tags.id
             GROUP BY tag"""
         res = cur.execute(sql)

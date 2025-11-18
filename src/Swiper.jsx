@@ -27,6 +27,12 @@ export default function MySwiper({ images, initialSlide, setIndex }) {
           keyboard={{ enabled: true }}
           modules={[EffectFade, Navigation, Keyboard]}
           className="mySwiper"
+          onKeyPress={(swiper, keycode) => {
+            console.log('swiper: keypress', swiper, keycode);
+            if (keycode == 27) {
+              swiper.destroy(false);
+            }
+          }}
           onActiveIndexChange={({ activeIndex }) => {
             console.log(`swiper: setIndex(${activeIndex}`);
             setIndex(activeIndex);

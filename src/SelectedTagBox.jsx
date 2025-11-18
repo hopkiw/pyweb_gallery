@@ -19,7 +19,7 @@ export default function SelectedTagBox({
   removeTagHandler,
   removeEditableHandler 
 }) {
-  console.log('SelectedTagBox<> render, tags are:', tags);
+  console.log('SelectedTagBox<> render');
   const [editing, setEditing] = useState(false);
   const [adding, setAdding] = useState(false);
   const [addTagValue, setAddTagValue] = useState(false);
@@ -36,11 +36,10 @@ export default function SelectedTagBox({
   };
 
   const handleKeyDown = ({ key, ...e }) => {
-    console.log('keydown!', key);
     if (key == 'Escape') {
       setAdding(false);
       setEditing(false);
-      e.preventDefault(); // is this even doing anything?
+      console.log('selectedtagbox: handler: escape pressed with props:', e);
     }
   };
 
@@ -54,7 +53,7 @@ export default function SelectedTagBox({
     />
   );
 
-  const options = allTags.map((t) => ({'value': t.tagText, 'label': `${t.tagText} (${t.count})`, count: t.count }));
+  const options = allTags.map((t) => ({value: t.tagText, label: `${t.tagText} (${t.count})`, count: t.count }));
   console.log();
 
   return (

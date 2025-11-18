@@ -12,6 +12,7 @@ import { usePythonApi } from './usePythonApi.js';
 
 
 export default function App() {
+  const [scrollPos, setScrollPos] = useState(0);
   const [allTags, setAllTags] = useState([]);
   const [excludedTags, setExcludedTags] = useState(() => {
     const saved = localStorage.getItem('excluded_tags');
@@ -68,7 +69,7 @@ export default function App() {
 
     const handler = ({ key }) => {
       if (key == 'Escape') {
-        console.log('escape pressed');
+        console.log('app:handler: escape pressed');
         setIndex(-1);
         setSelectedImages([]);
       }
@@ -77,20 +78,25 @@ export default function App() {
     window.addEventListener('keydown', handler);
 
     return () => {
+      console.log('app:useEffect: remove escape handler')
       window.removeEventListener('keydown', handler);
     }
   }, []);
 
+  useEffect(() => {
+    if (index == -1) {
+      console.log('app:useEffect: actually restore scroll');
+      setTimeout(() => window.scrollTo(0, scrollPos), 0);
+    }
+  }, [index, scrollPos]);
+
   // get all tags
   useEffect(() => {
-    console.log('app:useEffect: get all tags');
     if (!pythonApi) return;
 
     pythonApi.get_all_tags().then(tags => {
       if (tags) {
-        console.log('app:useEffect: got tags', tags);
         const newAllTags = tags.map(([tagText, count]) => ({ tagText, count }));
-        console.log('app:useEffect: generated newalltags', newAllTags);
         newAllTags.sort((a, b) => b.count - a.count);
         setAllTags(newAllTags);
       } else {
@@ -106,7 +112,7 @@ export default function App() {
     // const images = Object.keys(tagsByImage);
     const includedTagTexts = includedTags.map((t) => t.tagText);
     const excludedTagTexts = excludedTags.map((t) => t.tagText);
-    console.log(`useEffect: get_images include_tags=${includedTags} excludedTags=${excludedTags}`);
+    console.log(`useEffect: get_images include_tags=${includedTagTexts} excludedTags=${excludedTagTexts}`);
 
     pythonApi.get_images(includedTagTexts, excludedTagTexts).then((images) => {
       pythonApi.get_tags(images).then((newtagsbyimage) => {
@@ -126,7 +132,12 @@ export default function App() {
   const addIncludedTag = ({ tagText }) => {
     console.log('include tag clicked:', tagText);
     if (!includedTags.find((tag) => tag.tagText == tagText)) {
-      const count = allTags.find((tag) => tag.tagText == tagText).count;
+      const ttag = allTags.find((tag) => tag.tagText == tagText)
+      if (!ttag) {
+        console.log('tf, couldnt find tag:', ttag);
+        return;
+      }
+      const count = ttag.count;
       setIncludedTags([
         ...includedTags,
         { tagText, count }
@@ -192,7 +203,7 @@ export default function App() {
       if (!count) return;
 
 
-      // setAllTags({...allTags, tagText});
+      setAllTags([...allTags, tagText]);
     });
   }
 
@@ -210,9 +221,7 @@ export default function App() {
   }
 
   const visibleTags = [];
-  let imgCount = 0;
   for (const v of Object.values(tagsByImage)) {
-    imgCount += 1;
     for (const tagText of v) {
       if (!visibleTags.find((tag) => tag.tagText == tagText)) {
         const count = allTags.find((tag) => tag.tagText == tagText).count;
@@ -220,7 +229,7 @@ export default function App() {
       }
     }
   }
-  console.log(`app.render: there are ${visibleTags.size} tags visible on ${imgCount} images`);
+  visibleTags.sort((a, b) => b.count - a.count);
 
 
   const selectedTags = [];
@@ -240,9 +249,17 @@ export default function App() {
       }
     }
   }
+  selectedTags.sort((a, b) => b.count - a.count);
 
   return (
     <KeyStoreProvider>
+      <div className='header'>
+        <nav className='navigation'>
+          <div><a>hi</a></div>
+          <div><a>there</a></div>
+        </nav>
+        <div><p>something else</p></div>
+      </div>
       <div className='searchbar'>
         <div className='tagbox'>
           <SearchBox
@@ -303,18 +320,22 @@ export default function App() {
         { selectedImages.length && index < 0 ? ( `(${selectedImages.length} selected)` ) : null }
       </p>
       <hr />
-      { index >= 0 ?
+      <div hidden={index < 0}>
+      { index >= 0 ? (
         <MySwiper 
           images={images}
           initialSlide={index}
           setIndex={setIndexAndSelected}
-        /> : null 
-      }
+          hidden={index >= 0}
+        />
+      ) : null }
+      </div>
       <Gallery
         images={images}
         selectedImages={selectedImages}
         setIndex={setIndexAndSelected}
         setSelectedImages={setSelectedImages}
+        setScrollPos={setScrollPos}
         hidden={index >= 0}
       />
     </KeyStoreProvider>

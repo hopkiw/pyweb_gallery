@@ -1,46 +1,34 @@
 import React from 'react';
-import { useCallback, useEffect, useEffectEvent, useRef, useState } from 'react';
-
-import { RowsPhotoAlbum } from "react-photo-album";
-import "react-photo-album/rows.css";
+import { useEffect, useEffectEvent, useRef } from 'react';
 
 import { useKeyStore } from './KeyStoreProvider.jsx';
-
-async function getImageDimensions(src) {
-  return new Promise(resolve => {
-    const img = new Image();
-    img.src = src;
-    img.hidden = true;
-    img.className = 'liam';
-    img.onload = () => {
-      img.remove();
-      resolve({ width: img.naturalWidth, height: img.naturalHeight });
-    };
-    document.body.appendChild(img);
-  });
-}
-
-function getAllImages(images) {
-  const promises = images.map(async (image , index) => {
-    // const dimensions = await getImageDimensions(image);
-    return {
-        src: image,
-        key: `gallery-item-${index}`,
-        width: 500,
-        height: 500
-        // ...dimensions,
-    };
-  });
-  return Promise.all(promises);
-}
 
 function getRealImagePath(image) {
   const url = new URL(image);
   return decodeURI(url.pathname).substring(1);
 }
 
-export default function Gallery({ hidden, images, selectedImages, setIndex, setSelectedImages }) {
-  const [photos, setPhotos] = useState([]);
+function Image({ src, index, onclick, ondoubleclick }) {
+  const ref = useRef(null);
+
+  return (
+    <div className='item selectable' onClick={() => onclick({ index, img: ref.current })} onDoubleClick={() => ondoubleclick({ index, img: ref.current })} key={index}>
+      <img
+        src={src}
+        ref={ref}
+        className='imgitem' 
+      />
+    </div>
+  );
+}
+
+export default function Gallery({
+  hidden,
+  images,
+  selectedImages,
+  setIndex,
+  setSelectedImages,
+  setScrollPos }) {
   const galleryRef = useRef(null);
   const lastSelected = useRef(-1);
 
@@ -90,20 +78,14 @@ export default function Gallery({ hidden, images, selectedImages, setIndex, setS
     window.addEventListener('keydown', handler);
 
     return () => {
+      console.log('gallery:useEffect: remove keybind handler', keyStore)
       window.removeEventListener('keydown', handler);
     }
   }, [images, keyStore, mySetSelectedImages]);
 
-  // generate photo state from images - TODO: maybe redundant
-  useEffect(() => {
-    getAllImages(images).then((i) => {
-      setPhotos(i);
-    });
-  }, [images]);
-
   // apply class to selected items - TODO: move to onclick
   useEffect(() => {
-    const imageElements = document.getElementsByClassName('gallery-item');
+    const imageElements = document.getElementsByClassName('imgitem');
     for (const imgEl of imageElements) {
       const realPath = getRealImagePath(imgEl.src);
       if (selectedImages.includes(realPath)) {
@@ -114,7 +96,8 @@ export default function Gallery({ hidden, images, selectedImages, setIndex, setS
     }
   }, [selectedImages]);
 
-  const onClick = useCallback(({ index }) => {
+  const onClick = ({ index, img }) => {
+    console.log('clicked on', index, img);
     var newSelected = [];
 
     if (keyStore.keys.shift && lastSelected.current >= 0) {
@@ -130,23 +113,25 @@ export default function Gallery({ hidden, images, selectedImages, setIndex, setS
       lastSelected.current = index;
     }
 
+    img.classList.add('selected-image');
     setSelectedImages(newSelected);
-  }, [images, keyStore, selectedImages, setSelectedImages]);
+  };
+
+  const onDoubleClick = (index) => {
+    console.log('double-clicked on', index);
+
+    setScrollPos(window.pageYOffset);
+    setIndex(index);
+  };
+
+  const imgItems = images.map((src, index) => {
+    return <Image index={index} src={src} onclick={onClick} ondoubleclick={onDoubleClick} />
+  });
 
   return (
     <>
       <div className='gallery' ref={galleryRef} hidden={hidden} >
-        <RowsPhotoAlbum 
-          photos={photos} 
-          onClick={onClick}
-          render={{
-            image: (props, context) => <img
-              {...props}
-              onDoubleClick={() => setIndex(context.index)}
-              className={`gallery-item ${props.className}`}
-            />,
-          }}
-        />
+        {imgItems}
       </div>
     </>
   );
