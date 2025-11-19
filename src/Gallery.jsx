@@ -1,7 +1,7 @@
 import React from 'react';
 import { useEffect, useEffectEvent, useRef } from 'react';
 
-import { useKeyStore } from './KeyStoreProvider.jsx';
+import { useKeyStore } from './useKeyStore.js';
 
 function getRealImagePath(image) {
   const url = new URL(image);

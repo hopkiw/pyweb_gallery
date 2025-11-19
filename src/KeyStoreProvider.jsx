@@ -1,7 +1,6 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 
-const Context = createContext(undefined);
-
+import { KeyStoreContext } from './KeyStoreContext.js'
 
 function KeyStoreProvider({ children}) {
   console.log('keystoreprovider render');
@@ -51,11 +50,7 @@ function KeyStoreProvider({ children}) {
   }, [keyStore]);
 
 
-  return <Context.Provider value={keyStore}>{children}</Context.Provider>;
+  return <KeyStoreContext.Provider value={keyStore}>{children}</KeyStoreContext.Provider>;
 }
 
-function useKeyStore() {
-  return useContext(Context);
-}
-
-export { KeyStoreProvider, useKeyStore };
+export { KeyStoreProvider };
