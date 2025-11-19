@@ -25,6 +25,7 @@ export default function App() {
     return initialValue || [];
   });
   const [index, setIndex] = useState(-1);
+  const [tagPaneVisible, setTagPaneVisible] = useState(false);
 
   const [selectedImages, setSelectedImages] = useState([]);
   const [tagsByImage, setTagsByImage] = useState({});  // NOTE: Do not use in effect deplist.
@@ -84,11 +85,11 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (index == -1) {
+    if (index == -1 && !tagPaneVisible) {
       console.log('app:useEffect: actually restore scroll');
       setTimeout(() => window.scrollTo(0, scrollPos), 0);
     }
-  }, [index, scrollPos]);
+  }, [index, scrollPos, tagPaneVisible]);
 
   // get all tags
   useEffect(() => {
@@ -255,10 +256,9 @@ export default function App() {
     <KeyStoreProvider>
       <div className='header'>
         <nav className='navigation'>
-          <div><a>hi</a></div>
-          <div><a>there</a></div>
+          <div><a onClick={() => { setTagPaneVisible(false); }}>Images</a></div>
+          <div><a onClick={() => { setTagPaneVisible(true); setScrollPos(window.pageYOffset); }}>Tags</a></div>
         </nav>
-        <div><p>something else</p></div>
       </div>
       <div className='searchbar'>
         <div className='tagbox'>
@@ -315,29 +315,43 @@ export default function App() {
           </div>
           )}
       </div>
-      <p>
-        &nbsp;&nbsp;Images ({images.length})
-        { selectedImages.length && index < 0 ? ( `(${selectedImages.length} selected)` ) : null }
-      </p>
-      <hr />
-      <div hidden={index < 0}>
-      { index >= 0 ? (
-        <MySwiper 
-          images={images}
-          initialSlide={index}
-          setIndex={setIndexAndSelected}
-          hidden={index >= 0}
-        />
-      ) : null }
+
+      { tagPaneVisible ? (
+
+      <div>
+        <p>hello from the tag pane!</p>
       </div>
-      <Gallery
-        images={images}
-        selectedImages={selectedImages}
-        setIndex={setIndexAndSelected}
-        setSelectedImages={setSelectedImages}
-        setScrollPos={setScrollPos}
-        hidden={index >= 0}
-      />
+
+      ) : (
+
+      <div>
+        <p>
+          &nbsp;&nbsp;Images ({images.length})
+          { selectedImages.length && index < 0 ? ( ` (${selectedImages.length} selected)` ) : null }
+        </p>
+
+        <hr />
+
+        { index >= 0 ? (
+          <MySwiper 
+            images={images}
+            initialSlide={index}
+            setIndex={setIndexAndSelected}
+            hidden={index >= 0}
+          />
+        ) : null }
+
+        <Gallery
+          images={images}
+          selectedImages={selectedImages}
+          setIndex={setIndexAndSelected}
+          setSelectedImages={setSelectedImages}
+          setScrollPos={setScrollPos}
+        />
+      </div>
+
+      )}
+
     </KeyStoreProvider>
   );
 }
