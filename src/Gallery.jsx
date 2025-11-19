@@ -110,6 +110,7 @@ export default function Gallery({
       lastSelected.current = index;
     } else {
       newSelected = [images[index]];
+      console.log('regular click on index', index, newSelected);
       lastSelected.current = index;
     }
 
@@ -117,8 +118,8 @@ export default function Gallery({
     setSelectedImages(newSelected);
   };
 
-  const onDoubleClick = (index) => {
-    console.log('double-clicked on', index);
+  const onDoubleClick = ({ index }) => {
+    console.log('DOUBLE-CLICKED on', index);
 
     setScrollPos(window.pageYOffset);
     setIndex(index);

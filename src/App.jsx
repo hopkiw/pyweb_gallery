@@ -41,14 +41,13 @@ export default function App() {
 
   const images = Object.keys(tagsByImage);
 
-  // TODO: remember position in gallery (or scroll to index)
-  // TODO: cache images and/or image dimensions
-  // TODO: escape shouldn't deselect images if we're adding
-  // TODO: apply classes directly on click
-  // TODO: tag editor pane
   // TODO: consistent style in effects & handlers
   // TODO: audit for unnecessary state , when setState((prevstate) => prevstate + 1) could be used
   // TODO: always refresh state from DB
+  // TODO: tag pane: clicking a tag turns it into an edit field
+  // TODO: tag pane: limit tags shown at a time ?
+  // TODO: tag pane: live updating search for tags
+  // TODO: tag pane: tag categories
 
   // sync to storage
   useEffect(() => {
@@ -255,11 +254,36 @@ export default function App() {
   return (
     <KeyStoreProvider>
       <div className='header'>
-        <nav className='navigation'>
-          <div><a onClick={() => { setTagPaneVisible(false); }}>Images</a></div>
-          <div><a onClick={() => { setTagPaneVisible(true); setScrollPos(window.pageYOffset); }}>Tags</a></div>
+        <nav className='nnavigation'>
+          <button className={!tagPaneVisible ? 'selected_tab' : null}><a onClick={() => { setTagPaneVisible(false); }}>Images</a></button>
+          <button className={tagPaneVisible ? 'selected_tab' : null}><a onClick={() => { setTagPaneVisible(true); setScrollPos(window.pageYOffset); }}>Tags</a></button>
         </nav>
       </div>
+
+      { tagPaneVisible ? (
+
+      <div className='tagpane'>
+        <p>hello from the tag pane!</p>
+        <table>
+          <tr>
+            <th>Tag</th>
+            <th>Image count</th>
+            <th>Category</th>
+          </tr>
+        {allTags.map((tag, index) => 
+          <tr key={index}>
+            <td><a>{tag.tagText}</a></td>
+            <td>{tag.count}</td>
+            <td>None</td>
+          </tr>
+        )}
+        </table>
+
+      </div>
+
+      ) : (
+      
+      <div>
       <div className='searchbar'>
         <div className='tagbox'>
           <SearchBox
@@ -316,22 +340,7 @@ export default function App() {
           )}
       </div>
 
-      { tagPaneVisible ? (
-
       <div>
-        <p>hello from the tag pane!</p>
-      </div>
-
-      ) : (
-
-      <div>
-        <p>
-          &nbsp;&nbsp;Images ({images.length})
-          { selectedImages.length && index < 0 ? ( ` (${selectedImages.length} selected)` ) : null }
-        </p>
-
-        <hr />
-
         { index >= 0 ? (
           <MySwiper 
             images={images}
@@ -339,7 +348,7 @@ export default function App() {
             setIndex={setIndexAndSelected}
             hidden={index >= 0}
           />
-        ) : null }
+        ) : (
 
         <Gallery
           images={images}
@@ -348,6 +357,8 @@ export default function App() {
           setSelectedImages={setSelectedImages}
           setScrollPos={setScrollPos}
         />
+        )}
+      </div>
       </div>
 
       )}
