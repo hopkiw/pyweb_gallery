@@ -12,7 +12,11 @@ function Image({ src, index, onclick, ondoubleclick }) {
   const ref = useRef(null);
 
   return (
-    <div className='item selectable' onClick={() => onclick({ index, img: ref.current })} onDoubleClick={() => ondoubleclick({ index, img: ref.current })} key={index}>
+    <div
+      className='item selectable'
+      onClick={() => onclick({ index, img: ref.current })}
+      onDoubleClick={() => ondoubleclick({ index, img: ref.current })}
+      key={index}>
       <img
         src={src}
         ref={ref}
@@ -126,7 +130,7 @@ export default function Gallery({
   };
 
   const imgItems = images.map((src, index) => {
-    return <Image index={index} src={src} onclick={onClick} ondoubleclick={onDoubleClick} />
+    return <Image index={index} src={src} onclick={onClick} ondoubleclick={onDoubleClick} key={index} />
   });
 
   return (

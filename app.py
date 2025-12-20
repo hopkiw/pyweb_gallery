@@ -38,7 +38,7 @@ class Api:
 
 def main():
     dev = '--dev' in sys.argv
-    window = webview.create_window('pywebview-react boilerplate', 'http://localhost:5173' if dev else 'dist/index.html', js_api=Api())
+    window = webview.create_window('pywebview-gallery', 'http://localhost:5173' if dev else 'dist/index.html', js_api=Api())
     webview.settings['ALLOW_DOWNLOADS'] = dev
     webview.settings['REMOTE_DEBUGGING_PORT'] = 9222 if dev else None
     webview.settings['OPEN_DEVTOOLS_IN_DEBUG'] = False

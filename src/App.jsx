@@ -10,6 +10,40 @@ import TagBox from './TagBox.jsx';
 import { KeyStoreProvider } from './KeyStoreProvider.jsx';
 import { usePythonApi } from './usePythonApi.js';
 
+function EditableTagForm({ tagText }) {
+  const ref = useRef(undefined);
+
+  return (
+    <form
+      onSubmit={(e) => {
+
+        if (ref.current.type == 'text') {
+          console.log(e, ref.current, 'rename', tagText, 'to', ref.current.value);
+          tagText = ref.current.value;
+        }
+        ref.current.type = (ref.current.type == 'text') ? 'submit' : 'text';
+        e.preventDefault();
+      }}
+      onBlur={() => {
+        ref.current.value = tagText;
+        ref.current.type = 'submit';
+      }}
+    >
+      <input type='text' defaultValue={tagText} ref={ref} />
+    </form>
+  );
+}
+
+function FilterField({ setTagFilter }) {
+  const ref = useRef(undefined);
+
+  return (
+    <input type='text' onChange={() => {
+      console.log('i am a changin', ref.current.value);
+      setTagFilter(ref.current.value);
+    }} ref={ref} className='filterfield' />
+  );
+}
 
 export default function App() {
   const [scrollPos, setScrollPos] = useState(0);
@@ -29,6 +63,8 @@ export default function App() {
 
   const [selectedImages, setSelectedImages] = useState([]);
   const [tagsByImage, setTagsByImage] = useState({});  // NOTE: Do not use in effect deplist.
+  const [sortByTag, setSortByTag] = useState(false);
+  const [tagFilter, setTagFilter] = useState('');
 
   console.log('app render, index is', index, 'there are ', selectedImages.length, ' images selected:', 
     selectedImages);
@@ -97,13 +133,19 @@ export default function App() {
     pythonApi.get_all_tags().then(tags => {
       if (tags) {
         const newAllTags = tags.map(([tagText, count]) => ({ tagText, count }));
-        newAllTags.sort((a, b) => b.count - a.count);
+        if (!sortByTag) {
+          console.log('got new tags, sorting by COUNT');
+          newAllTags.sort((a, b) => b.count - a.count);
+        } else {
+          console.log('got new tags, sorting by TAG');
+          newAllTags.sort((a, b) => b.tagText < a.tagText);
+        }
         setAllTags(newAllTags);
       } else {
         console.log('didnt get any tags????');
       }
     });
-  }, [pythonApi, setAllTags]);
+  }, [pythonApi, setAllTags, sortByTag]);
 
   // get images
   useEffect(() => {
@@ -262,23 +304,31 @@ export default function App() {
 
       { tagPaneVisible ? (
 
-      <div className='tagpane'>
-        <p>hello from the tag pane!</p>
-        <table>
-          <tr>
-            <th>Tag</th>
-            <th>Image count</th>
-            <th>Category</th>
-          </tr>
-        {allTags.map((tag, index) => 
-          <tr key={index}>
-            <td><a>{tag.tagText}</a></td>
-            <td>{tag.count}</td>
-            <td>None</td>
-          </tr>
-        )}
-        </table>
+      <div>
+        <div className='searchbar'>
+          <div className='tagbox'>
+            <FilterField setTagFilter={setTagFilter} />
+          </div>
+        </div>
+        <div className='tagpane'>
+          <p>hello from the tag pane!</p>
+          <table>
+            <tr>
+              <th onClick={() => {setSortByTag(true)}}>Tag</th>
+              <th onClick={() => {setSortByTag(false)}}>Image count</th>
+              <th>Category</th>
+            </tr>
+          {allTags.filter((tag) => (tagFilter == '' || tag.tagText.toLowerCase().includes(tagFilter.toLowerCase())))
+            .map((tag) => 
+            <tr key={tag.tagText}>
+              <td><EditableTagForm tagText={tag.tagText} /></td>
+              <td>{tag.count}</td>
+              <td>None</td>
+            </tr>
+            )}
+          </table>
 
+        </div>
       </div>
 
       ) : (

@@ -4,7 +4,7 @@ import Select from 'react-select';
 
 import TagBox from './TagBox.jsx';
 
-export default function SearchBox({ tagBoxId, title, allTags, tags, setTags, inputref }) {
+export default function SearchBox({ tagBoxId, title, allTags=[], tags, setTags, inputref }) {
   console.log('searchbox render');
   const [value, setValue] = useState(null);
 
