@@ -13,7 +13,10 @@ class TagDB:
         cur.execute("""
         CREATE TABLE IF NOT EXISTS tags (
             id  INTEGER PRIMARY KEY,
-            tag TEXT UNIQUE NOT NULL
+            tag TEXT UNIQUE NOT NULL,
+            typeid INTEGER,
+            page TEXT,
+            FOREIGN KEY(typeid) REFERENCES tagtypes(id)
         )""")
         cur.execute("""
         CREATE TABLE IF NOT EXISTS images (
@@ -21,6 +24,11 @@ class TagDB:
             image_path TEXT NOT NULL,
             image_hash TEXT NOT NULL,
             UNIQUE(image_path, image_hash)
+        )""")
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS tagtypes (
+            id  INTEGER PRIMARY KEY,
+            type TEXT UNIQUE NOT NULL
         )""")
         cur.execute("""
         CREATE TABLE IF NOT EXISTS imagetags (
