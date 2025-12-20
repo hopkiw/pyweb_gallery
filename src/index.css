@@ -153,4 +153,5 @@ div + div { margin-top: 10px; }
 
 .filterfield {
   background-color: white;
+  outline: 1px solid black;
 }

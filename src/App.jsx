@@ -134,11 +134,11 @@ export default function App() {
       if (tags) {
         const newAllTags = tags.map(([tagText, count]) => ({ tagText, count }));
         if (!sortByTag) {
-          console.log('got new tags, sorting by COUNT');
           newAllTags.sort((a, b) => b.count - a.count);
+          console.log('got new tags, sorting by COUNT:', newAllTags);
         } else {
-          console.log('got new tags, sorting by TAG');
-          newAllTags.sort((a, b) => b.tagText < a.tagText);
+          newAllTags.sort((a, b) => a.tagText.toLowerCase().localeCompare(b.tagText.toLowerCase()));
+          console.log('got new tags, sorting by TAG:', newAllTags);
         }
         setAllTags(newAllTags);
       } else {
@@ -313,19 +313,23 @@ export default function App() {
         <div className='tagpane'>
           <p>hello from the tag pane!</p>
           <table>
-            <tr>
-              <th onClick={() => {setSortByTag(true)}}>Tag</th>
-              <th onClick={() => {setSortByTag(false)}}>Image count</th>
-              <th>Category</th>
-            </tr>
-          {allTags.filter((tag) => (tagFilter == '' || tag.tagText.toLowerCase().includes(tagFilter.toLowerCase())))
-            .map((tag) => 
-            <tr key={tag.tagText}>
-              <td><EditableTagForm tagText={tag.tagText} /></td>
-              <td>{tag.count}</td>
-              <td>None</td>
-            </tr>
-            )}
+            <thead>
+              <tr>
+                <th><a onClick={() => {setSortByTag(true)}}>Tag</a></th>
+                <th><a onClick={() => {setSortByTag(false)}}>Image count</a></th>
+                <th><a>Category</a></th>
+              </tr>
+            </thead>
+            <tbody>
+              {allTags.filter((tag) => (tagFilter == '' || tag.tagText.toLowerCase().includes(tagFilter.toLowerCase())))
+                .map((tag) => 
+                <tr key={tag.tagText}>
+                  <td><EditableTagForm tagText={tag.tagText} /></td>
+                  <td>{tag.count}</td>
+                  <td>None</td>
+                </tr>
+                )}
+            </tbody>
           </table>
 
         </div>
