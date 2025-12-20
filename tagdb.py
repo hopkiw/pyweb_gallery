@@ -51,8 +51,6 @@ class TagDB:
                      )
               """
         vals = list(zip([tag] * len(images), images))
-        print('sql:', sql)
-        print('vals:', vals)
         cur.executemany(sql, vals)
         self.con.commit()
 
@@ -155,9 +153,6 @@ class TagDB:
                                ON tags.id == imagetags.tag_id
                             WHERE tag = ?)"""
 
-        print('final sql:', sql)
-        print('tags are:', tags)
-        print('exclude_tags are:', exclude_tags)
 
         res = cur.execute(sql, tags + exclude_tags)
 
@@ -234,11 +229,21 @@ class TagDB:
               )"""
 
         vals = list(zip([tag] * len(images), images))
-        print('sql:', sql, 'vals:', vals)
         cur.executemany(sql, vals)
         self.con.commit()
 
         return cur.rowcount
+
+    def rename_tag(self, old, new):
+        cur = self.con.cursor()
+        sql = """
+              UPDATE tags
+              SET tag = ?
+              WHERE tag = ?"""
+
+        print('executing ', sql, 'from', old, 'to', new)
+        cur.execute(sql, (old, new))
+        self.con.commit()
 
 
 def getmd5sum(path):

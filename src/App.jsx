@@ -10,7 +10,7 @@ import TagBox from './TagBox.jsx';
 import { KeyStoreProvider } from './KeyStoreProvider.jsx';
 import { usePythonApi } from './usePythonApi.js';
 
-function EditableTagForm({ tagText }) {
+function EditableTagForm({ renameTag, tagText }) {
   const ref = useRef(undefined);
 
   return (
@@ -18,8 +18,8 @@ function EditableTagForm({ tagText }) {
       onSubmit={(e) => {
 
         if (ref.current.type == 'text') {
-          console.log(e, ref.current, 'rename', tagText, 'to', ref.current.value);
-          tagText = ref.current.value;
+          console.log(`rename ${tagText} to ${ref.current.value}`);
+          renameTag({oldTag: tagText, newTag: ref.current.value});
         }
         ref.current.type = (ref.current.type == 'text') ? 'submit' : 'text';
         e.preventDefault();
@@ -250,6 +250,21 @@ export default function App() {
   }
 
   // callback
+  const renameTag = ({ oldTag, newTag }) => {
+    if (!pythonApi) return;
+
+    console.log(`rename REALLY ${oldTag} to ${newTag}`);
+    pythonApi.rename_tag(oldTag, newTag).then(() => {
+      const newAllTags = allTags.map((tag) => {
+        if (tag.tagText == oldTag)
+          tag.tagText = newTag;
+        return tag;
+      });
+      setAllTags(newAllTags);
+    });
+  }
+
+  // callback
   const setIndexAndSelected = (index_) => {
     console.log('combine callback, set index to', index_);
     // TODO: aren't effects supposed to handle this 'if changed' logic
@@ -324,7 +339,7 @@ export default function App() {
               {allTags.filter((tag) => (tagFilter == '' || tag.tagText.toLowerCase().includes(tagFilter.toLowerCase())))
                 .map((tag) => 
                 <tr key={tag.tagText}>
-                  <td><EditableTagForm tagText={tag.tagText} /></td>
+                  <td><EditableTagForm renameTag={renameTag} tagText={tag.tagText} /></td>
                   <td>{tag.count}</td>
                   <td>None</td>
                 </tr>
