@@ -153,7 +153,6 @@ class TagDB:
                                ON tags.id == imagetags.tag_id
                             WHERE tag = ?)"""
 
-
         res = cur.execute(sql, tags + exclude_tags)
 
         return [entry[0] for entry in res.fetchall()]
@@ -186,10 +185,12 @@ class TagDB:
     def get_all_tags(self):
         cur = self.con.cursor()
         sql = """
-              SELECT tag, count(tag_id)
+              SELECT tag, COALESCE(type, 'Default'), page, count(tag_id)
                 FROM imagetags
           RIGHT JOIN tags
                   ON imagetags.tag_id = tags.id
+          LEFT JOIN tagtypes
+                  ON tags.typeid = tagtypes.id
             GROUP BY tag"""
         res = cur.execute(sql)
 
@@ -242,8 +243,32 @@ class TagDB:
               WHERE tag = ?"""
 
         print('executing ', sql, 'from', old, 'to', new)
-        cur.execute(sql, (old, new))
+        cur.execute(sql, (new, old))
         self.con.commit()
+
+        return cur.rowcount
+
+    def set_tag_type(self, tag, tagType):
+        cur = self.con.cursor()
+        sql = """
+              UPDATE tags
+              SET typeid = (SELECT id FROM tagtypes WHERE type = ?)
+              WHERE tag = ?"""
+        cur.execute(sql, (tagType, tag))
+        self.con.commit()
+
+        return cur.rowcount
+
+    def set_tag_page(self, tag, tagPage):
+        cur = self.con.cursor()
+        sql = """
+              UPDATE tags
+              SET page = ?
+              WHERE tag = ?"""
+        cur.execute(sql, (tagPage, tag))
+        self.con.commit()
+
+        return cur.rowcount
 
 
 def getmd5sum(path):

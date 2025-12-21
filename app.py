@@ -34,6 +34,16 @@ class Api:
         db = TagDB()
         return db.rename_tag(old, new)
 
+    def set_tag_type(self, tag, tagType):
+        print('got JS request: set tag type')
+        db = TagDB()
+        return db.set_tag_type(tag, tagType)
+
+    def set_tag_page(self, tag, tagPage):
+        print('got JS request: set tag page', tag, tagPage)
+        db = TagDB()
+        return db.set_tag_page(tag, tagPage)
+
 
 def main():
     dev = '--dev' in sys.argv

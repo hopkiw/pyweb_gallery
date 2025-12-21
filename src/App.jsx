@@ -15,6 +15,8 @@ function EditableTagForm({ renameTag, tagText }) {
 
   return (
     <form
+      style={{display:'inline'}}
+
       onSubmit={(e) => {
 
         if (ref.current.type == 'text') {
@@ -38,10 +40,40 @@ function FilterField({ setTagFilter }) {
   const ref = useRef(undefined);
 
   return (
-    <input type='text' onChange={() => {
+    <input type='search' onChange={() => {
       console.log('i am a changin', ref.current.value);
       setTagFilter(ref.current.value);
     }} ref={ref} className='filterfield' />
+  );
+}
+
+function EditablePage({ tagPage, setTagPage }) {
+  function handleSubmit(e) {
+    e.preventDefault();
+
+    // Read the form data
+    const form = e.target;
+    const formData = new FormData(form);
+
+    // Or you can work with it as a plain object:
+    const formJson = Object.fromEntries(formData.entries());
+    console.log(formJson.tagPage);
+    setTagPage(formJson.tagPage);
+  }
+
+  return (
+    <form method="post" onSubmit={handleSubmit}>
+      <label>
+        Edit your post:
+        <textarea
+          name="tagPage"
+          defaultValue={tagPage}
+          rows={4}
+          cols={40}
+        />
+      </label>
+      <button type="submit">Save post</button>
+    </form>
   );
 }
 
@@ -65,6 +97,7 @@ export default function App() {
   const [tagsByImage, setTagsByImage] = useState({});  // NOTE: Do not use in effect deplist.
   const [sortByTag, setSortByTag] = useState(false);
   const [tagFilter, setTagFilter] = useState('');
+  const [selectedTag, setSelectedTag] = useState('');
 
   console.log('app render, index is', index, 'there are ', selectedImages.length, ' images selected:', 
     selectedImages);
@@ -132,7 +165,7 @@ export default function App() {
 
     pythonApi.get_all_tags().then(tags => {
       if (tags) {
-        const newAllTags = tags.map(([tagText, count]) => ({ tagText, count }));
+        const newAllTags = tags.map(([tagText, tagType, tagPage, count]) => ({ tagText, tagType, tagPage, count }));
         if (!sortByTag) {
           newAllTags.sort((a, b) => b.count - a.count);
           console.log('got new tags, sorting by COUNT:', newAllTags);
@@ -264,6 +297,43 @@ export default function App() {
     });
   }
 
+  /*
+  // callback
+  const setTagType = ({ tagText, tagType }) => {
+    if (!pythonApi) return;
+
+    pythonApi.set_tag_type(tagText, tagType).then(() => {
+      const newAllTags = allTags.map((tag) => {
+        if (tag.tagText == tagText) {
+          tag.tagType = tagType;
+        }
+        return tag;
+      });
+      setAllTags(newAllTags);
+    });
+  }
+  */
+
+  // callback
+  const setTagPage = ({ tagText, tagPage }) => {
+    if (!pythonApi) return;
+
+    pythonApi.set_tag_page(tagText, tagPage).then((count) => {
+      if (count != 1) {
+        console.log('error of some kind setting tag page');
+        return;
+      }
+
+      const newAllTags = allTags.map((tag) => {
+        if (tag.tagText == tagText) {
+          tag.tagPage = tagPage;
+        }
+        return tag;
+      });
+      setAllTags(newAllTags);
+    });
+  }
+
   // callback
   const setIndexAndSelected = (index_) => {
     console.log('combine callback, set index to', index_);
@@ -308,12 +378,19 @@ export default function App() {
   }
   selectedTags.sort((a, b) => b.count - a.count);
 
+  const selectedTagReal = allTags.find((tag) => tag.tagText == selectedTag);
+  console.log('selectedTagReal:', selectedTagReal, selectedTag);
+
   return (
     <KeyStoreProvider>
       <div className='header'>
-        <nav className='nnavigation'>
-          <button className={!tagPaneVisible ? 'selected_tab' : null}><a onClick={() => { setTagPaneVisible(false); }}>Images</a></button>
-          <button className={tagPaneVisible ? 'selected_tab' : null}><a onClick={() => { setTagPaneVisible(true); setScrollPos(window.pageYOffset); }}>Tags</a></button>
+        <nav className='navigation'>
+          <button className={!tagPaneVisible ? 'selected_tab' : null}>
+            <a onClick={() => { setTagPaneVisible(false); }}>Images</a>
+          </button>
+          <button className={tagPaneVisible ? 'selected_tab' : null}>
+            <a onClick={() => { setTagPaneVisible(true); setScrollPos(window.pageYOffset); }}>Tags</a>
+          </button>
         </nav>
       </div>
 
@@ -326,7 +403,8 @@ export default function App() {
           </div>
         </div>
         <div className='tagpane'>
-          <p>hello from the tag pane!</p>
+          { selectedTag == '' ? (
+
           <table>
             <thead>
               <tr>
@@ -336,16 +414,32 @@ export default function App() {
               </tr>
             </thead>
             <tbody>
-              {allTags.filter((tag) => (tagFilter == '' || tag.tagText.toLowerCase().includes(tagFilter.toLowerCase())))
+              {allTags.filter((tag) => 
+                (tagFilter == '' || tag.tagText.toLowerCase().includes(tagFilter.toLowerCase())))
                 .map((tag) => 
                 <tr key={tag.tagText}>
-                  <td><EditableTagForm renameTag={renameTag} tagText={tag.tagText} /></td>
+                  <td style={{display:'inline'}}><a href={'/' + tag.tagText} onClick={(e) => {setSelectedTag(tag.tagText); e.preventDefault()}}>?</a><EditableTagForm renameTag={renameTag} tagText={tag.tagText} /></td>
                   <td>{tag.count}</td>
-                  <td>None</td>
+                  <td>{tag.tagType}</td>
                 </tr>
                 )}
             </tbody>
           </table>
+
+          ) : (
+
+            <div>
+              <p>Back to <a href='/' onClick={(e) => {setSelectedTag(''); e.preventDefault()}}>tags</a></p>
+              <p>Info for tag {selectedTagReal.tagText}</p>
+              <p>tag count: {selectedTagReal.count}</p>
+              <p>tag type: {selectedTagReal.tagType}</p>
+              <EditablePage
+                tagPage={selectedTagReal.tagPage}
+                setTagPage={(page) => {setTagPage({ tagText: selectedTagReal.tagText, tagPage: page })}}
+              />
+            </div>
+
+          )}
 
         </div>
       </div>
