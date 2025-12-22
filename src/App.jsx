@@ -1,79 +1,25 @@
 import React from 'react';
 import { useEffect, useRef, useState } from 'react';
 
+import EditablePage from './EditablePage.jsx';
+import EditableTagForm from './EditableTagForm.jsx';
 import Gallery from './Gallery.jsx';
+import Swiper from './Swiper.jsx';
 import SearchBox from './SearchBox.jsx';
-import MySwiper from './Swiper.jsx';
 import SelectedTagBox from './SelectedTagBox.jsx';
 import TagBox from './TagBox.jsx';
 
 import { KeyStoreProvider } from './KeyStoreProvider.jsx';
 import { usePythonApi } from './usePythonApi.js';
 
-function EditableTagForm({ renameTag, tagText }) {
-  const ref = useRef(undefined);
-
-  return (
-    <form
-      style={{display:'inline'}}
-
-      onSubmit={(e) => {
-
-        if (ref.current.type == 'text') {
-          console.log(`rename ${tagText} to ${ref.current.value}`);
-          renameTag({oldTag: tagText, newTag: ref.current.value});
-        }
-        ref.current.type = (ref.current.type == 'text') ? 'submit' : 'text';
-        e.preventDefault();
-      }}
-      onBlur={() => {
-        ref.current.value = tagText;
-        ref.current.type = 'submit';
-      }}
-    >
-      <input type='text' defaultValue={tagText} ref={ref} />
-    </form>
-  );
-}
 
 function FilterField({ setTagFilter }) {
   const ref = useRef(undefined);
 
   return (
     <input type='search' onChange={() => {
-      console.log('i am a changin', ref.current.value);
       setTagFilter(ref.current.value);
     }} ref={ref} className='filterfield' />
-  );
-}
-
-function EditablePage({ tagPage, setTagPage }) {
-  function handleSubmit(e) {
-    e.preventDefault();
-
-    // Read the form data
-    const form = e.target;
-    const formData = new FormData(form);
-
-    // Or you can work with it as a plain object:
-    const formJson = Object.fromEntries(formData.entries());
-    console.log(formJson.tagPage);
-    setTagPage(formJson.tagPage);
-  }
-
-  return (
-    <form method="post" onSubmit={handleSubmit}>
-      <label>
-        Edit your post:
-        <textarea
-          name="tagPage"
-          defaultValue={tagPage}
-          rows={4}
-          cols={40}
-        />
-      </label>
-      <button type="submit">Save post</button>
-    </form>
   );
 }
 
@@ -505,7 +451,7 @@ export default function App() {
 
       <div>
         { index >= 0 ? (
-          <MySwiper 
+          <Swiper 
             images={images}
             initialSlide={index}
             setIndex={setIndexAndSelected}
