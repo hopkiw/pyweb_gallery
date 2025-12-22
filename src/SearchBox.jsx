@@ -5,13 +5,11 @@ import Select from 'react-select';
 import TagBox from './TagBox.jsx';
 
 export default function SearchBox({ tagBoxId, title, allTags=[], tags, setTags, inputref }) {
-  console.log('searchbox render');
   const [value, setValue] = useState(null);
 
   const handleOnChange = ({ value: tagText, count }) => {
     if (!tagText) return;
     if (!tags.find((tag) => tag.tagText == tagText)) {
-      console.log('searchbox: callback: ADD new tag:', tagText);
       setTags([
         ...tags,
         {tagText, count}
@@ -22,7 +20,6 @@ export default function SearchBox({ tagBoxId, title, allTags=[], tags, setTags, 
 
   // callback
   const removeTag = ({ tagText }) => {
-    console.log('searchbox: callback: remove tag:', tagText);
     const newTags = tags.filter(t => t.tagText !== tagText);
     setTags(newTags);
   }

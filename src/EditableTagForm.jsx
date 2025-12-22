@@ -12,7 +12,6 @@ export default function EditableTagForm({ renameTag, tagText }) {
       onSubmit={(e) => {
 
         if (ref.current.type == 'text') {
-          console.log(`rename ${tagText} to ${ref.current.value}`);
           renameTag({oldTag: tagText, newTag: ref.current.value});
         }
         ref.current.type = (ref.current.type == 'text') ? 'submit' : 'text';

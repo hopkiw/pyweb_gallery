@@ -3,18 +3,15 @@ import React, { useState, useEffect } from 'react';
 import { KeyStoreContext } from './KeyStoreContext.js'
 
 function KeyStoreProvider({ children}) {
-  console.log('keystoreprovider render');
   const [keyStore, setKeyStore] = useState();
 
   useEffect(() => {
     setKeyStore((prevState) => {
-      console.log('keystore:useeffect:setup');
       if (prevState) return prevState;
       return { keys: { control: false, shift: false } }
     });
     return () => {
       if (keyStore) {
-        console.log('keystore:useeffect:setup cleanup');
         setKeyStore(undefined);
       }
     };

@@ -32,7 +32,17 @@ export default function App() {
         setAllTags(newAllTags);
       } 
     });
-  }, [pythonApi, setAllTags]);
+  }, [pythonApi]);
+
+  useEffect(() => {
+    if (tagPaneVisible) {
+      console.log('app: scroll tag pane to', tagScrollPos);
+      setTimeout(() => window.scrollTo(0, tagScrollPos), 3000);
+    } else {
+      console.log('app: scroll gallery pane to', galleryScrollPos);
+      setTimeout(() => window.scrollTo(0, galleryScrollPos), 3000);
+    }
+  }, [galleryScrollPos, tagPaneVisible, tagScrollPos]);
 
   // callback
   const createTag = ({ tagText }) => {

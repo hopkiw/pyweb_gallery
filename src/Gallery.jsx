@@ -37,7 +37,6 @@ export default function Gallery({
   const lastSelected = useRef(-1);
 
   const keyStore = useKeyStore();
-  console.log('gallery render, keyStore:', keyStore);
 
   // TODO: is this needed?
   const mySetSelectedImages = useEffectEvent((images) => {
@@ -46,7 +45,6 @@ export default function Gallery({
 
   // key bindings
   useEffect(() => {
-    console.log('gallery:useEffect: add keybind handler', keyStore)
 
     const handler = ({ key }) => {
       if (key == 'a' && keyStore.keys.control) {
@@ -82,7 +80,6 @@ export default function Gallery({
     window.addEventListener('keydown', handler);
 
     return () => {
-      console.log('gallery:useEffect: remove keybind handler', keyStore)
       window.removeEventListener('keydown', handler);
     }
   }, [images, keyStore, mySetSelectedImages]);

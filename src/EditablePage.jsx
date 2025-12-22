@@ -8,7 +8,6 @@ export default function EditablePage({ tagPage, setTagPage }) {
 
     // Or you can work with it as a plain object:
     const formJson = Object.fromEntries(formData.entries());
-    console.log(formJson.tagPage);
     setTagPage(formJson.tagPage);
   }
 

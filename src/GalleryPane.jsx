@@ -81,6 +81,7 @@ export default function GalleryPane({ allTags, createTag, scrollPos, setScrollPo
   // reset scroll
   useEffect(() => {
     if (index == -1) {
+      console.log('gallery: restore scroll to', scrollPos);
       setTimeout(() => window.scrollTo(0, scrollPos), 0);
     }
   }, [index, scrollPos]);
@@ -159,7 +160,7 @@ export default function GalleryPane({ allTags, createTag, scrollPos, setScrollPo
       if (!visibleTags.find((tag) => tag.tagText == tagText)) {
         const found = allTags.find((tag) => tag.tagText == tagText);
         if (!found) {
-          console.log('couldnt find tag in alltags:', tagText);
+          console.log('couldnt find tag in alltags:', tagText, allTags);
           return;
         }
         visibleTags.push({ tagText, count: found.count });

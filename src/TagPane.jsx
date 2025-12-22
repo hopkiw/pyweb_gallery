@@ -22,13 +22,16 @@ export default function TagPane({ allTags, renameTag, setTagPage, scrollPos, set
   // reset scroll
   useEffect(() => {
     if (selectedTag == '') {
-      console.log('scrolling tagpane');
+      console.log('tagpane: restore scroll to', scrollPos);
       setTimeout(() => window.scrollTo(0, scrollPos), 0);
     }
   }, [selectedTag, scrollPos]);
 
   const selectedTagReal = allTags.find((tag) => tag.tagText == selectedTag);
   console.log('sortByTag:', sortByTag);
+
+  const duplicates = allTags.filter((item, index) => allTags.indexOf(item) !== index);
+  console.log('yeah there are duplicates:', duplicates);
 
   return (
     <div>

@@ -10,7 +10,6 @@ import 'swiper/css/keyboard';
 import { EffectFade, Navigation, Keyboard } from 'swiper/modules';
 
 export default function Swiper({ images, initialSlide, setIndex }) {
-  console.log('Swiper render');
   const slides = images.map((src) => {
     return <SwiperSlide><img src={src}/></SwiperSlide>;
   });
@@ -28,17 +27,14 @@ export default function Swiper({ images, initialSlide, setIndex }) {
           modules={[EffectFade, Navigation, Keyboard]}
           className="Swiper"
           onKeyPress={(swiper, keycode) => {
-            console.log('swiper: keypress', swiper, keycode);
             if (keycode == 27) {
               swiper.destroy(false);
             }
           }}
           onActiveIndexChange={({ activeIndex }) => {
-            console.log(`swiper: setIndex(${activeIndex}`);
             setIndex(activeIndex);
           }}
           onDestroy={() => {
-            console.log('swiper destroy: reset index -1');
             setIndex(-1);
           }}
         > {slides} </RealSwiper>
