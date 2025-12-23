@@ -14,10 +14,12 @@ function getSnapshot() {
 function subscribe(callback) {
   const handler = () => {
     if (!window.pywebview) {
+      console.log('got pywebviewready, but pywebview is', window.pywebview);
       return;
     }
 
     if (store.pythonApi != window.pywebview.api) {
+      console.log('pywebview is now:', window.pywebview);
       store.pythonApi = window.pywebview.api;
       callback();
     }

@@ -140,9 +140,13 @@ export default function GalleryPane({ allTags, createTag, scrollPos, setScrollPo
 
   // callback
   const addTagToImages = ({ tagText }) => {
-    if (!pythonApi) return;
+    if (!pythonApi) {
+      console.log('tried to add tag to images, but no python api');
+      return;
+    }
 
     pythonApi.add_tag_to_images(tagText, selectedImages).then((count) => {
+      console.log('tagged', count, 'images');
       if (!count) return;
 
       const copy = { ...tagsByImage };
@@ -150,6 +154,7 @@ export default function GalleryPane({ allTags, createTag, scrollPos, setScrollPo
         const tags = copy[image];
         copy[image] = [...tags, tagText];
       }
+      console.log('updating tagsByImage');
       setTagsByImage(copy);
     });
   }
@@ -160,8 +165,7 @@ export default function GalleryPane({ allTags, createTag, scrollPos, setScrollPo
       if (!visibleTags.find((tag) => tag.tagText == tagText)) {
         const found = allTags.find((tag) => tag.tagText == tagText);
         if (!found) {
-          console.log('couldnt find tag in alltags:', tagText, allTags);
-          return;
+          continue;
         }
         visibleTags.push({ tagText, count: found.count });
       }
@@ -177,8 +181,11 @@ export default function GalleryPane({ allTags, createTag, scrollPos, setScrollPo
       }
       for (const tagText of tagsByImage[image]) {
         if (!selectedTags.find((tag) => tag.tagText == tagText)) {
-          const count = allTags.find((tag) => tag.tagText == tagText).count;
-          selectedTags.push({tagText, count});
+          const found = allTags.find((tag) => tag.tagText == tagText);
+          if (!found) {
+            continue;
+          }
+          selectedTags.push({tagText, count: found.count});
         }
       }
     }
@@ -216,8 +223,8 @@ export default function GalleryPane({ allTags, createTag, scrollPos, setScrollPo
               title='Tags on selected'
               tags={selectedTags}
               allTags={allTags}
-              changeHandler={addTagToImages}
-              createTag={createTag}
+              addTagToImages={addTagToImages}
+              createTagHandler={createTag}
               addTagHandler={addIncludedTag}
               removeTagHandler={addExcludedTag}
               removeEditableHandler={removeTagFromImages}

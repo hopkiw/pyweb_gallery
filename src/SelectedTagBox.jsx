@@ -14,8 +14,8 @@ export default function SelectedTagBox({
   tags = [],
   allTags,
   addTagHandler,
-  changeHandler,
-  createTag,
+  addTagToImages,
+  createTagHandler,
   removeTagHandler,
   removeEditableHandler 
 }) {
@@ -25,16 +25,26 @@ export default function SelectedTagBox({
   const addTagRef = useRef(null);
 
   // callback
-  const handleChange = ({ value: tagText }) => {
-    if (!tagText) return;
+  const addTag = ({ value: tagText }) => {
+    if (!tagText) {
+      console.log('idk why but i didnt get tagtext');
+      return;
+    }
 
-    // console.log('SelectedTagBox.handleChange:', tagText);
-    changeHandler({ tagText });
+    addTagToImages({ tagText });
     setAddTagValue('');
     setAdding(false);
   };
 
-  const handleKeyDown = ({ key, ...e }) => {
+  // callback
+  const createTag = (tagText) => {
+    console.log('first create tag', tagText);
+    createTagHandler({ tagText });
+    console.log('then add tag', tagText);
+    addTag({ value: tagText });
+  };
+
+  const handleKeyDown = ({ key }) => {
     if (key == 'Escape') {
       setAdding(false);
       setEditing(false);
@@ -72,9 +82,9 @@ export default function SelectedTagBox({
         <CreatableSelect
           autoFocus={true}
           isClearable
-          onChange={handleChange}
+          onChange={addTag}
           onKeyDown={handleKeyDown}
-          onCreateOption={(tagText) => createTag({ tagText })}
+          onCreateOption={createTag}
           options={options}
           value={addTagValue}
           ref={addTagRef}

@@ -5,35 +5,68 @@ import GalleryPane from './GalleryPane.jsx';
 import TagPane from './TagPane.jsx';
 
 import { KeyStoreProvider } from './KeyStoreProvider.jsx';
-import { usePythonApi } from './usePythonApi.js';
+// import { usePythonApi } from './usePythonApi.js';
 
 export default function App() {
   const [allTags, setAllTags] = useState([]);
   const [tagPaneVisible, setTagPaneVisible] = useState(false);
   const [galleryScrollPos, setGalleryScrollPos] = useState(0);
   const [tagScrollPos, setTagScrollPos] = useState(0);
+  const [pythonApi, setPythonApi] = useState(undefined);
+
+  console.log('app.render, alltags:', allTags);
 
   // pythonApi
-  const pythonApi = usePythonApi();
+  // const pythonApi = usePythonApi();
 
   // TODO: consistent style in effects & handlers
   // TODO: audit for unnecessary state , when setState((prevstate) => prevstate + 1) could be used
   // TODO: always refresh state from DB
   // TODO: tag pane: limit tags shown at a time ?
+  //
+  useEffect(() => {
+    const handler = () => {
+      if (!window.pywebview) {
+        console.log('got pywebviewready, but pywebview is', window.pywebview);
+        return;
+      }
+
+      if (pythonApi != window.pywebview.api) {
+        console.log('pythonApi is now:', pythonApi);
+        console.log('window.pywebview.api is now:', window.pywebview.api);
+        setPythonApi(window.pywebview.api);
+      }
+    }
+
+    window.addEventListener('pywebviewready', handler);
+
+    return () => {
+      window.removeEventListener('pywebviewready', handler);
+    }
+  }, [pythonApi]);
 
   // get all tags
   useEffect(() => {
-    if (!pythonApi) return;
+    if (!pythonApi) {
+      console.log('python is not ready yet, what am i suppposed to do about this?');
+      return;
+    }
 
     pythonApi.get_all_tags().then(tags => {
       if (tags) {
         const newAllTags = tags.map(([tagText, tagType, tagPage, count]) => ({ tagText, tagType, tagPage, count }));
         newAllTags.sort((a, b) => b.count - a.count);
+        if (newAllTags.toString() == allTags.toString()) {
+          console.log('tags have not changed');
+          return;
+        }
+        console.log('setting tags:', newAllTags);
         setAllTags(newAllTags);
       } 
     });
-  }, [pythonApi]);
+  }, [allTags, pythonApi]);
 
+  /*
   useEffect(() => {
     if (tagPaneVisible) {
       console.log('app: scroll tag pane to', tagScrollPos);
@@ -43,12 +76,17 @@ export default function App() {
       setTimeout(() => window.scrollTo(0, galleryScrollPos), 3000);
     }
   }, [galleryScrollPos, tagPaneVisible, tagScrollPos]);
+  */
 
   // callback
   const createTag = ({ tagText }) => {
-    if (!pythonApi) return;
+    if (!pythonApi) {
+      console.log('tried to create tag but no pythonApi yet');
+      return;
+    }
 
     pythonApi.create_tag(tagText).then((count) => {
+      console.log('created', count, 'tags');
       if (!count) return;
 
       setAllTags([...allTags, tagText]);
