@@ -53,27 +53,21 @@ export default function Gallery({
       }
       if (key == 'ArrowRight') {
         console.log('right-arrow pressed');
-        lastSelected.current = lastSelected.current + 1;
         if (keyStore.keys.shift) {
+          lastSelected.current = lastSelected.current + 1;
           mySetSelectedImages((prevstate) => {
             return [...prevstate, images[lastSelected.current]];
           });
-        } else {
-          console.log('without shift, setting selected images:', images[lastSelected.current]);
-          mySetSelectedImages([images[lastSelected.current]]);
-        }
+        } 
       }
       if (key == 'ArrowLeft') {
         console.log('left-arrow pressed');
-        lastSelected.current = lastSelected.current - 1;
         if (keyStore.keys.shift) {
+          lastSelected.current = lastSelected.current - 1;
           mySetSelectedImages((prevstate) => {
             return [...prevstate, images[lastSelected.current]];
           });
-        } else {
-          console.log('without shift, setting selected images:', images[lastSelected.current]);
-          mySetSelectedImages([images[lastSelected.current]]);
-        }
+        } 
       }
     };
 

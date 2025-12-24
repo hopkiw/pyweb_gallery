@@ -25,11 +25,16 @@ export default function SelectedTagBox({
   const addTagRef = useRef(null);
 
   // callback
-  const addTag = ({ value: tagText }) => {
-    if (!tagText) {
-      console.log('idk why but i didnt get tagtext');
+  const addTag = (arg) => {
+    if (!arg) {
+      console.log('no arg?');
       return;
     }
+    if (!arg.value) {
+      console.log('idk why but i didnt get tagtext, i got', arg);
+      return;
+    }
+    const tagText = arg.value;
 
     addTagToImages({ tagText });
     setAddTagValue('');
@@ -94,6 +99,3 @@ export default function SelectedTagBox({
     </>
   );
 }
-
-
-// TODO: onCreateOption is not needed if we use getNewOptionData appropriately?

@@ -13,8 +13,10 @@ export default function App() {
   const [galleryScrollPos, setGalleryScrollPos] = useState(0);
   const [tagScrollPos, setTagScrollPos] = useState(0);
   const [pythonApi, setPythonApi] = useState(undefined);
+  const [imageCount, setImageCount] = useState(0);
+  const [index, setIndex] = useState(-1);
 
-  console.log('app.render, alltags:', allTags);
+  console.log('app.render');
 
   // pythonApi
   // const pythonApi = usePythonApi();
@@ -23,7 +25,7 @@ export default function App() {
   // TODO: audit for unnecessary state , when setState((prevstate) => prevstate + 1) could be used
   // TODO: always refresh state from DB
   // TODO: tag pane: limit tags shown at a time ?
-  //
+
   useEffect(() => {
     const handler = () => {
       if (!window.pywebview) {
@@ -32,8 +34,6 @@ export default function App() {
       }
 
       if (pythonApi != window.pywebview.api) {
-        console.log('pythonApi is now:', pythonApi);
-        console.log('window.pywebview.api is now:', window.pywebview.api);
         setPythonApi(window.pywebview.api);
       }
     }
@@ -47,10 +47,7 @@ export default function App() {
 
   // get all tags
   useEffect(() => {
-    if (!pythonApi) {
-      console.log('python is not ready yet, what am i suppposed to do about this?');
-      return;
-    }
+    if (!pythonApi) return;
 
     pythonApi.get_all_tags().then(tags => {
       if (tags) {
@@ -151,7 +148,7 @@ export default function App() {
             <a onClick={() => {
               setTagScrollPos(window.pageYOffset);
               setTagPaneVisible(false);
-            }}>Images</a>
+            }}>Images ({imageCount})</a>
           </button>
           <button className={tagPaneVisible ? 'selected_tab' : null}>
             <a onClick={() => {
@@ -173,8 +170,11 @@ export default function App() {
         <GalleryPane
           allTags={allTags}
           createTag={createTag}
+          index={index}
+          setIndex={setIndex}
           scrollPos={galleryScrollPos}
           setScrollPos={setGalleryScrollPos}
+          setImageCount={setImageCount}
         />
       )}
     </KeyStoreProvider>

@@ -2,8 +2,10 @@
     display: none;
 }
 
-body {
+html, body {
   background: FloralWhite;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 input {

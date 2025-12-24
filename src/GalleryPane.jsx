@@ -9,7 +9,14 @@ import SearchBox from './SearchBox.jsx';
 import SelectedTagBox from './SelectedTagBox.jsx';
 import TagBox from './TagBox.jsx';
 
-export default function GalleryPane({ allTags, createTag, scrollPos, setScrollPos }) {
+export default function GalleryPane({
+  allTags,
+  createTag,
+  index,
+  setIndex,
+  scrollPos,
+  setScrollPos,
+  setImageCount }) {
   const [includedTags, setIncludedTags] = useState(() => {
     const saved = localStorage.getItem('included_tags');
     const initialValue = JSON.parse(saved);
@@ -21,7 +28,7 @@ export default function GalleryPane({ allTags, createTag, scrollPos, setScrollPo
     return initialValue || [];
   });
 
-  const [index, setIndex] = useState(-1);
+  // const [index, setIndex] = useState(-1);
   const [selectedImages, setSelectedImages] = useState([]);
   const [tagsByImage, setTagsByImage] = useState({});  // NOTE: Do not use in effect deplist.
 
@@ -29,6 +36,8 @@ export default function GalleryPane({ allTags, createTag, scrollPos, setScrollPo
   const excludeInputRef = useRef(null);
 
   const pythonApi = usePythonApi();
+
+  console.log('gallerypane render, index is', index);
 
   // sync to storage
   useEffect(() => {
@@ -54,7 +63,7 @@ export default function GalleryPane({ allTags, createTag, scrollPos, setScrollPo
     return () => {
       window.removeEventListener('keydown', handler);
     }
-  }, []);
+  }, [setIndex]);
 
   // get images
   useEffect(() => {
@@ -67,9 +76,10 @@ export default function GalleryPane({ allTags, createTag, scrollPos, setScrollPo
     pythonApi.get_images(includedTagTexts, excludedTagTexts).then((images) => {
       pythonApi.get_tags(images).then((newtagsbyimage) => {
         setTagsByImage(newtagsbyimage);
+        setImageCount(Object.keys(newtagsbyimage).length);
       });
     });
-  }, [includedTags, excludedTags, pythonApi]);
+  }, [includedTags, excludedTags, setImageCount, pythonApi]);
 
   // focus input field
   useEffect(() => {
@@ -80,7 +90,7 @@ export default function GalleryPane({ allTags, createTag, scrollPos, setScrollPo
 
   // reset scroll
   useEffect(() => {
-    if (index == -1) {
+    if (index == -1 && scrollPos != 0) {
       console.log('gallery: restore scroll to', scrollPos);
       setTimeout(() => window.scrollTo(0, scrollPos), 0);
     }
@@ -230,6 +240,7 @@ export default function GalleryPane({ allTags, createTag, scrollPos, setScrollPo
               removeEditableHandler={removeTagFromImages}
             />
           </div>
+          { index == -1 ? (
           <div className='tagbox'>
             <TagBox
               id='all-tags'
@@ -239,6 +250,11 @@ export default function GalleryPane({ allTags, createTag, scrollPos, setScrollPo
               removeTagHandler={addExcludedTag}
             />
           </div>
+          ) : (
+          <div className='imagedetails'>
+            <p>Filename {images[index]}</p>
+          </div>
+          )}
           { images.length ? null : (
           <div className='tagbox'>
             <TagBox
@@ -254,12 +270,14 @@ export default function GalleryPane({ allTags, createTag, scrollPos, setScrollPo
 
       <div>
         { index >= 0 ? (
+
           <Swiper 
             images={images}
             initialSlide={index}
             setIndex={setIndexAndSelected}
             hidden={index >= 0}
           />
+
         ) : (
 
         <Gallery
